@@ -795,12 +795,9 @@
 
             const pickCard = () => {
                 setDeck(currentDeck => {
-                    if (newDeck.length === 0) {
+                    if (currentDeck.length === 0) {
                         setCurrentCard(null);
-                        const card = currentDeck[0]; // Wait, logic error in original? No, if empty logic handles it.
-                        // Actually original logic had a return inside if.
-                        // Let's stick to simple safety.
-                        setTimeout(() => endTurn(true), 0);
+                        setTimeout(() => endTurn(true), 0); // End Round immediately
                         return currentDeck;
                     }
                     const card = currentDeck[0];
