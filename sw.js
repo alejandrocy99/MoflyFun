@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mofly-fun-v1.2'; // Increment this for updates
+const CACHE_NAME = 'mofly-fun-v1.3'; // Increment this for updates
 const ASSETS = [
   './',
   './index.html',
