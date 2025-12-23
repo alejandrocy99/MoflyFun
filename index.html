@@ -342,7 +342,7 @@
                     <div className="relative inline-block">
                         <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
                         <span className="absolute -top-4 -right-6 bg-brand-pink text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white transform rotate-12 shadow-lg animate-pulse">
-                            v2.0
+                            v2.1
                         </span>
                     </div>
 
@@ -739,21 +739,57 @@
 
             // Init Deck
             // Init Deck
+            // Init Deck
             useEffect(() => {
-                // Settings.categories is now an array passed from Lobby
+                // Fisher-Yates Shuffle
+                const shuffle = (array) => {
+                    let currentIndex = array.length, randomIndex;
+                    while (currentIndex != 0) {
+                        randomIndex = Math.floor(Math.random() * currentIndex);
+                        currentIndex--;
+                        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                    }
+                    return array;
+                };
+
                 let categories = settings.categories || ['random'];
                 let words = [];
 
-                // Get words from all selected categories (handle if singular for legacy safety)
                 if (!Array.isArray(categories)) categories = [categories];
 
                 categories.forEach(c => {
                     if (WORD_DB[c]) words = words.concat(WORD_DB[c]);
                 });
 
-                // Shuffle and pick subset
-                // INCREASED DECK SIZE from 30 to 40
-                const gameDeck = words.sort(() => 0.5 - Math.random()).slice(0, 40);
+                // Filter out recently seen words from localStorage
+                const seenWords = JSON.parse(localStorage.getItem('mofly_seen_words') || '[]');
+                const availableWords = words.filter(w => !seenWords.includes(w));
+
+                // If we have enough "fresh" words, use them. Otherwise, mix in seen words and reset history partially.
+                let pool = [];
+                if (availableWords.length >= 40) {
+                    pool = availableWords;
+                } else {
+                    // Not enough fresh words, reset history logic substantially or just use mixed
+                    // Strategy: Use all available fresh + fill rest with shuffled used words
+                    // And maybe clear history if it's too full
+                    if (availableWords.length < 10) {
+                        // If almost exhausted, reset history entirely for these categories
+                        localStorage.setItem('mofly_seen_words', '[]');
+                        pool = words;
+                    } else {
+                        pool = words; // Fallback to full pool if low on fresh
+                    }
+                }
+
+                const gameDeck = shuffle([...pool]).slice(0, 40);
+
+                // Update seen words
+                const newSeen = [...seenWords, ...gameDeck];
+                // Limit history size to avoid bloating (keep last 500)
+                if (newSeen.length > 500) newSeen.splice(0, newSeen.length - 500);
+                localStorage.setItem('mofly_seen_words', JSON.stringify(newSeen));
+
                 setDeck(gameDeck);
             }, []);
 
@@ -978,7 +1014,9 @@
                         <div className="w-full max-w-sm bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden animate-pop border-b-8 border-gray-300 relative flex flex-col items-center z-10 min-h-[400px] justify-center">
 
                             <div className="p-8 text-center w-full z-10 flex flex-col justify-center items-center">
-                                <h2 className="text-6xl font-black font-display text-gray-900 uppercase tracking-tight break-words leading-none">
+                                <h2 className={`font-black font-display text-gray-900 uppercase tracking-tight break-words leading-none transition-all duration-300
+                                    ${(currentCard || "").length > 25 ? 'text-3xl' : (currentCard || "").length > 15 ? 'text-4xl' : (currentCard || "").length > 8 ? 'text-5xl' : 'text-6xl'}
+                                `}>
                                     {currentCard || "..."}
                                 </h2>
                             </div>
