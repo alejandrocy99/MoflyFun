@@ -5,13 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mofly Fun</title>
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#701a75">
+
+    <!-- PWA Config -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#be185d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <!-- Icon -->
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3790/3790109.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
 
     <!-- CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -119,9 +132,10 @@
         const { useState, useEffect, useMemo, useRef } = React;
 
         // --- DATA ---
+        // --- DATA ---
         const CHALLENGES = [
             { id: 1, text: "Mano en la cabeza todo el turno", verbal: true },
-            { id: 2, text: "Habla con la lengua fuera", verbal: true },
+            { id: 2, text: "Habla con la lengua fuera", verbal: false },
             { id: 3, text: "Salta mientras explicas", verbal: true },
             { id: 4, text: "Canta en lugar de hablar", verbal: true },
             { id: 5, text: "De espaldas al equipo", verbal: true },
@@ -130,8 +144,24 @@
             { id: 8, text: "Imita a un famoso (di cuál)", verbal: true },
             { id: 9, text: "Ojos cerrados", verbal: true },
             { id: 10, text: "Susurrando muy bajito", verbal: true },
-            // Mímica exclusive/compatible challenges could be added
+            // New Challenges
+            { id: 11, text: "Nariz tapada todo el turno", verbal: true },
+            { id: 12, text: "Acento extranjero exagerado", verbal: true },
+            { id: 13, text: "Explicar enfadado/a", verbal: true },
+            { id: 14, text: "Sin mover los brazos", verbal: true },
+            { id: 15, text: "Rodillas flexionadas", verbal: true },
+            { id: 16, text: "Cara de sorpresa constante", verbal: true },
+            { id: 17, text: "Explicar como si fuera un secreto", verbal: true },
+            { id: 18, text: "Reírse entre cada frase", verbal: true },
+            { id: 19, text: "Hablar muy lento", verbal: true },
+            { id: 20, text: "Moverse a cámara lenta", verbal: true },
         ];
+
+        // ... (WORD_DB remains unchanged) ...
+
+        // ... (Rest of file components) ...
+
+
 
         const WORD_DB = {
             cine: [
@@ -345,15 +375,23 @@
             );
         };
 
+        // --- SCROLL TO TOP UTILITY ---
+        const scrollToTop = () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         const Lobby = ({ onGameStart }) => {
             const [names, setNames] = useState([]);
             const [nameInput, setNameInput] = useState("");
-            const [category, setCategory] = useState("random");
+            // Changed from single string to ARRAY of strings
+            const [selectedCategories, setSelectedCategories] = useState(['random']);
             const [generatedTeams, setGeneratedTeams] = useState(null);
             const [rouletteEnabled, setRouletteEnabled] = useState(true);
             const [numTeams, setNumTeams] = useState(2);
 
             const [draggedPlayer, setDraggedPlayer] = useState(null);
+
+            const availableCategories = Object.keys(WORD_DB);
 
             const addName = () => {
                 if (nameInput.trim().length > 0) {
@@ -362,9 +400,28 @@
                 }
             };
 
+            const toggleCategory = (cat) => {
+                setSelectedCategories(prev => {
+                    if (prev.includes(cat)) {
+                        // Don't allow empty if it's the last one, or just handle empty validation elsewhere
+                        if (prev.length === 1) return prev;
+                        return prev.filter(c => c !== cat);
+                    } else {
+                        return [...prev, cat];
+                    }
+                });
+            };
+
+            const toggleAllCategories = () => {
+                if (selectedCategories.length === availableCategories.length) {
+                    setSelectedCategories([]);
+                } else {
+                    setSelectedCategories(availableCategories);
+                }
+            };
+
             const generateTeams = () => {
                 const shuffled = [...names].sort(() => 0.5 - Math.random());
-                // Use manual numTeams
                 const actualNumTeams = Math.min(numTeams, names.length, TEAM_COLORS.length);
 
                 const teams = Array.from({ length: actualNumTeams }, (_, i) => ({
@@ -430,7 +487,6 @@
                                                     key={idx}
                                                     draggable="true"
                                                     onDragStart={(e) => {
-                                                        // Stop propagation to avoid issues if nested
                                                         e.stopPropagation();
                                                         onDragStart(e, m, i);
                                                     }}
@@ -446,7 +502,8 @@
                         </div>
                         <div className="flex gap-4 mb-4">
                             <Button onClick={() => setGeneratedTeams(null)} color="gray" className="flex-1">Rehacer</Button>
-                            <Button onClick={() => onGameStart(generatedTeams, category, rouletteEnabled)} color="brand-yellow" className="flex-1">¡Empezar!</Button>
+                            {/* Pass array of categories */}
+                            <Button onClick={() => onGameStart(generatedTeams, selectedCategories, rouletteEnabled)} color="brand-yellow" className="flex-1">¡Empezar!</Button>
                         </div>
                     </div>
                 );
@@ -456,7 +513,7 @@
                 <div className="flex flex-col h-screen p-4">
                     <h2 className="text-3xl font-display text-center mb-6 mt-4">Configuración</h2>
 
-                    <div className="flex-1 overflow-y-auto space-y-6">
+                    <div className="flex-1 overflow-y-auto space-y-6 pb-20">
                         {/* Player Input */}
                         <section>
                             <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Jugadores</label>
@@ -499,18 +556,34 @@
 
                         {/* Category Selector */}
                         <section>
-                            <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Categoría</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {Object.keys(WORD_DB).concat(['todo']).map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setCategory(cat)}
-                                        className={`p-3 rounded-xl border-2 font-bold capitalize transition-all ${category === cat ? 'bg-brand-pink border-brand-pink text-white' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
-                                    >
-                                        {cat === 'todo' ? '¡Mezclado!' : cat}
-                                    </button>
-                                ))}
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-sm font-bold text-gray-400 uppercase">Categorías</label>
+                                <button
+                                    onClick={toggleAllCategories}
+                                    className="text-xs font-bold text-brand-pink hover:text-white transition-colors uppercase"
+                                >
+                                    {selectedCategories.length === availableCategories.length ? 'Desmarcar Todo' : 'Marcar Todo'}
+                                </button>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                {availableCategories.map(cat => {
+                                    const isSelected = selectedCategories.includes(cat);
+                                    return (
+                                        <button
+                                            key={cat}
+                                            onClick={() => toggleCategory(cat)}
+                                            className={`p-3 rounded-xl border-2 font-bold capitalize transition-all duration-200 ${isSelected ? 'bg-brand-pink border-brand-pink text-white shadow-lg scale-[1.02]' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                                        >
+                                            <div className="flex items-center justify-between w-full">
+                                                <span>{cat}</span>
+                                                {isSelected && <Icon name="check" size="sm" />}
+                                            </div>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                            {selectedCategories.length === 0 && <p className="text-red-400 text-sm mt-2 font-bold animate-pulse">¡Elige al menos una!</p>}
                         </section>
 
                         {/* Options */}
@@ -530,11 +603,11 @@
                         </section>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-4 bg-gradient-to-t from-gray-900 via-gray-900 to-transparent">
                         <Button
                             onClick={generateTeams}
-                            disabled={names.length < numTeams}
-                            className={`w-full ${names.length < numTeams ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={names.length < numTeams || selectedCategories.length === 0}
+                            className={`w-full ${names.length < numTeams || selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                             color="brand-cyan"
                             size="lg"
                         >
@@ -648,6 +721,8 @@
             // Game State
             const [round, setRound] = useState(1);
             const [currentTeamIdx, setCurrentTeamIdx] = useState(0);
+            // Track which player index is up next for each team
+            const [teamPlayerIndices, setTeamPlayerIndices] = useState(teams.map(() => 0));
             const [deck, setDeck] = useState([]);
             const [turnDeck, setTurnDeck] = useState([]); // Cards for current turn usage or reshuffling
 
@@ -658,14 +733,27 @@
             const [currentCard, setCurrentCard] = useState(null);
             const [scoreThisTurn, setScoreThisTurn] = useState(0);
 
+            const handleChallengeFail = () => {
+                // End turn immediately if challenge failed
+                endTurn();
+            };
+
+
+
+            // Init Deck
             // Init Deck
             useEffect(() => {
-                let categories = settings.category === 'todo' ? Object.keys(WORD_DB) : [settings.category];
+                // Settings.categories is now an array passed from Lobby
+                let categories = settings.categories || ['random'];
                 let words = [];
-                // Get words
+
+                // Get words from all selected categories (handle if singular for legacy safety)
+                if (!Array.isArray(categories)) categories = [categories];
+
                 categories.forEach(c => {
                     if (WORD_DB[c]) words = words.concat(WORD_DB[c]);
                 });
+
                 // Shuffle and pick subset
                 // INCREASED DECK SIZE from 30 to 40
                 const gameDeck = words.sort(() => 0.5 - Math.random()).slice(0, 40);
@@ -684,6 +772,7 @@
             }, [phase, timeLeft]);
 
             const currentTeam = teams[currentTeamIdx];
+            const currentPlayerName = currentTeam.members[teamPlayerIndices[currentTeamIdx]];
 
             const startTurn = () => {
                 if (settings.rouletteEnabled) {
@@ -706,9 +795,12 @@
 
             const pickCard = () => {
                 setDeck(currentDeck => {
-                    if (currentDeck.length === 0) {
+                    if (newDeck.length === 0) {
                         setCurrentCard(null);
-                        setTimeout(() => endTurn(true), 0); // End Round immediately
+                        const card = currentDeck[0]; // Wait, logic error in original? No, if empty logic handles it.
+                        // Actually original logic had a return inside if.
+                        // Let's stick to simple safety.
+                        setTimeout(() => endTurn(true), 0);
                         return currentDeck;
                     }
                     const card = currentDeck[0];
@@ -735,7 +827,9 @@
                             setTimeout(() => endTurn(true), 0);
                         } else {
                             // Pick next
-                            setTimeout(() => setCurrentCard(newDeck[0]), 50);
+                            setTimeout(() => {
+                                setCurrentCard(newDeck[0]);
+                            }, 50);
                         }
                         return newDeck;
                     });
@@ -743,7 +837,9 @@
                     // Pass: Recycle directly to bottom of effective deck
                     setDeck(prev => {
                         const newDeck = [...prev.slice(1), currentCard];
-                        setTimeout(() => setCurrentCard(newDeck[0]), 50);
+                        setTimeout(() => {
+                            setCurrentCard(newDeck[0]);
+                        }, 50);
                         return newDeck;
                     });
                 }
@@ -769,12 +865,27 @@
                         setDeck(fullDeck);
                         setTurnDeck([]); // Reset accumulator
 
+                        // Rotate player for the team that just finished
+                        setTeamPlayerIndices(prev => {
+                            const newIndices = [...prev];
+                            newIndices[currentTeamIdx] = (newIndices[currentTeamIdx] + 1) % teams[currentTeamIdx].members.length;
+                            return newIndices;
+                        });
+
                         // Pass turn
                         setCurrentTeamIdx((currentTeamIdx + 1) % teams.length);
                         setPhase('PRE_TURN');
                     }
                 } else {
                     // Just next turn
+
+                    // Rotate player for the team that just finished
+                    setTeamPlayerIndices(prev => {
+                        const newIndices = [...prev];
+                        newIndices[currentTeamIdx] = (newIndices[currentTeamIdx] + 1) % teams[currentTeamIdx].members.length;
+                        return newIndices;
+                    });
+
                     setCurrentTeamIdx((currentTeamIdx + 1) % teams.length);
                     setPhase('PRE_TURN');
                 }
@@ -785,7 +896,12 @@
                 return (
                     <div className={`flex flex-col h-screen p-6 items-center justify-center text-center ${currentTeam.bg} transition-colors duration-500`}>
                         <h2 className="text-xl uppercase font-bold text-white/80 mb-2">Turno del Equipo</h2>
-                        <h1 className="text-6xl font-display text-white mb-8">{currentTeam.name}</h1>
+                        <h1 className="text-6xl font-display text-white mb-4">{currentTeam.name}</h1>
+
+                        <div className="bg-black/30 px-6 py-3 rounded-2xl mb-8 animate-pulse">
+                            <p className="text-sm font-bold text-gray-300 uppercase mb-1">Le toca a</p>
+                            <p className="text-3xl font-black text-brand-yellow">{currentPlayerName}</p>
+                        </div>
 
                         <div className="bg-white/20 p-6 rounded-3xl backdrop-blur-md mb-8 w-full max-w-sm">
                             <p className="text-xl font-bold uppercase mb-1">Ronda {round}</p>
@@ -860,27 +976,34 @@
                     </div>
 
                     {/* Card */}
-                    <div className="flex-1 flex items-center justify-center mb-8 relative">
+                    <div className="flex-1 flex flex-col justify-center items-center mb-8 relative w-full px-4">
                         {/* Card Stack Effect */}
-                        <div className="absolute w-full max-w-sm h-64 bg-white/10 rounded-3xl transform rotate-3 scale-95" />
-                        <div className="absolute w-full max-w-sm h-64 bg-white/20 rounded-3xl transform -rotate-2 scale-98" />
+                        <div className="absolute w-full max-w-sm h-80 bg-white/10 rounded-3xl transform rotate-3 scale-95 top-10" />
+                        <div className="absolute w-full max-w-sm h-80 bg-white/20 rounded-3xl transform -rotate-2 scale-98 top-5" />
 
-                        <div className="w-full max-w-sm h-80 bg-white text-gray-900 rounded-3xl shadow-2xl flex items-center justify-center p-6 text-center z-10 animate-pop">
-                            <h2 className="text-5xl font-display font-black leading-tight break-words">
-                                {currentCard || "..."}
-                            </h2>
+                        <div className="w-full max-w-sm bg-white text-gray-900 rounded-3xl shadow-2xl overflow-hidden animate-pop border-b-8 border-gray-300 relative flex flex-col items-center z-10 min-h-[400px] justify-center">
+
+                            <div className="p-8 text-center w-full z-10 flex flex-col justify-center items-center">
+                                <h2 className="text-6xl font-black font-display text-gray-900 uppercase tracking-tight break-words leading-none">
+                                    {currentCard || "..."}
+                                </h2>
+                            </div>
                         </div>
                     </div>
 
                     {/* Controls */}
-                    <div className="grid grid-cols-2 gap-4 pb-4">
-                        <Button onClick={() => handleAnswer(false)} color="red" size="lg" className="h-24 flex flex-col items-center justify-center">
-                            <Icon name="close" size="lg" />
-                            <span className="text-sm mt-1">PASAR</span>
+                    <div className="grid grid-cols-3 gap-2 pb-4 h-24">
+                        <Button onClick={() => handleAnswer(false)} color="gray" size="lg" className="flex flex-col items-center justify-center">
+                            <Icon name="close" size="md" />
+                            <span className="text-xs mt-1">PASAR</span>
                         </Button>
-                        <Button onClick={() => handleAnswer(true)} color="green" size="lg" className="h-24 flex flex-col items-center justify-center">
-                            <Icon name="check" size="lg" />
-                            <span className="text-sm mt-1">ACIERTO</span>
+                        <Button onClick={handleChallengeFail} color="red" size="lg" className="flex flex-col items-center justify-center">
+                            <Icon name="warning" size="md" />
+                            <span className="text-xs mt-1">FALLÓ RETO</span>
+                        </Button>
+                        <Button onClick={() => handleAnswer(true)} color="green" size="lg" className="flex flex-col items-center justify-center">
+                            <Icon name="check" size="md" />
+                            <span className="text-xs mt-1">BIEN</span>
                         </Button>
                     </div>
                 </div>
