@@ -16,15 +16,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
     <!-- Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered:', reg.scope))
-                    .catch(err => console.log('SW registration failed:', err));
-            });
-        }
-    </script>
+    <!-- Service Worker handled in React app -->
 
     <!-- CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -347,7 +339,12 @@
 
             return (
                 <div className="flex flex-col h-screen p-6 items-center justify-center text-center space-y-8">
-                    <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
+                    <div className="relative inline-block">
+                        <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
+                        <span className="absolute -top-4 -right-6 bg-brand-pink text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white transform rotate-12 shadow-lg animate-pulse">
+                            v2.0
+                        </span>
+                    </div>
 
                     <Card className="w-full max-w-sm bg-brand-purple border-brand-pink relative overflow-hidden">
                         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
@@ -1038,6 +1035,32 @@
         const App = () => {
             // Phases: TUTORIAL -> LOBBY -> GAME -> VICTORY
             const [appPhase, setAppPhase] = useState('TUTORIAL');
+            const [updateAvailable, setUpdateAvailable] = useState(false);
+
+            useEffect(() => {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('./sw.js').then(registration => {
+                        if (registration.waiting) setUpdateAvailable(true);
+                        registration.onupdatefound = () => {
+                            const newWorker = registration.installing;
+                            newWorker.onstatechange = () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    setUpdateAvailable(true);
+                                }
+                            };
+                        };
+                    });
+                    navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+                }
+            }, []);
+
+            const updateApp = () => {
+                if (navigator.serviceWorker && navigator.serviceWorker.waiting) {
+                    navigator.serviceWorker.waiting.postMessage({ type: 'SKIP_WAITING' });
+                } else {
+                    window.location.reload();
+                }
+            };
             const [gameData, setGameData] = useState({ teams: [], settings: {} });
 
             const handleTutorialEnd = () => setAppPhase('LOBBY');
@@ -1062,6 +1085,25 @@
                     {appPhase === 'LOBBY' && <Lobby onGameStart={handleGameStart} />}
                     {appPhase === 'GAME' && <Game teams={gameData.teams} settings={gameData.settings} onEndGame={handleGameEnd} />}
                     {appPhase === 'VICTORY' && <Victory teams={gameData.teams} onRestart={handleRestart} />}
+
+                    {/* Update Toast */}
+                    {updateAvailable && (
+                        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-sm bg-brand-dark/90 backdrop-blur border-2 border-brand-yellow text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between z-[100] animate-slide-up">
+                            <div className="flex items-center gap-3">
+                                <Icon name="system_update" className="text-brand-yellow animate-bounce" />
+                                <div>
+                                    <p className="font-bold text-sm">¡Actualización!</p>
+                                    <p className="text-xs text-gray-300">Nueva versión disponible</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={updateApp}
+                                className="bg-brand-yellow text-black font-bold px-3 py-1.5 rounded-lg text-sm shadow-lg hover:scale-105 transition-transform"
+                            >
+                                ACTUALIZAR
+                            </button>
+                        </div>
+                    )}
                 </div>
             );
         };
