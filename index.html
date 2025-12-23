@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muscle & Macro Architect</title>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- PWA Manifest (URL Encoded for stability) -->
+    <link rel="manifest"
+        href='data:application/json;charset=utf-8,%7B%22name%22%3A%22Muscle%20%26%20Macro%20Architect%22%2C%22short_name%22%3A%22MMA%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1a1a%22%2C%22theme_color%22%3A%22%231a1a1a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F2554%2F2554039.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
+    <!-- CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#B6F262', // Neon Lime
+                        surface: '#242424',
+                        background: '#121212',
+                        accent: '#E0E0E0',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: height 0.5s ease-in-out;
+            background: linear-gradient(180deg, #4FC3F7 0%, #0288D1 100%);
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        // --- Data & Constants ---
+        const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+        const VERSION_KEY = 'gym_data_v5';
+        const DEFAULT_DIET = [
+            { id: 'breakfast', name: 'Desayuno', items: 'Creatina + 3 Huevos plancha + 1 Tostada', calories: 505, macros: { p: 36, c: 45, f: 20 }, consumed: false },
+            { id: 'lunch', name: 'Comida', items: '125g Arroz + 200g Pollo/Ternera + Ensalada (50g Maíz, 80g Atún)', calories: 1005, macros: { p: 70, c: 140, f: 15 }, consumed: false },
+            { id: 'snack', name: 'Merienda', items: '2 Yogures + 1 cazo Proteína + 30g Nueces', calories: 610, macros: { p: 53, c: 33, f: 30 }, consumed: false },
+            { id: 'dinner', name: 'Cena', items: '2 Huevos + 80g Atún + 1 Tostada + 1 Cuch. Aceite', calories: 515, macros: { p: 60, c: 25, f: 25 }, consumed: false },
+        ];
+        const WORKOUT_ROUTINE = {
+            'Lunes': {
+                focus: 'Empuje (Pecho/Hombro/Tríceps)',
+                exercises: [
+                    { id: 'push1', name: 'Press Banca Plano Barra', sets: '4x6-8 / 2-3\'' },
+                    { id: 'push2', name: 'Press Inclinado Mancuernas', sets: '3x8-10 / 2-3\'' },
+                    { id: 'push3', name: 'Press Militar Mancuernas', sets: '3x8-10 / 2-3\'' },
+                    { id: 'push4', name: 'Aperturas en Polea', sets: '3x12-15 / 60-90s' },
+                    { id: 'push5', name: 'Elevaciones Laterales', sets: '3x12-15 / 60-90s' },
+                    { id: 'push6', name: 'Fondos o Press Cerrado', sets: '3x8-10 / 2-3\'' },
+                    { id: 'push7', name: 'Tríceps Polea Cuerda', sets: '2x12-15 / 60-90s' }
+                ]
+            },
+            'Martes': {
+                focus: 'Tracción (Espalda/Bíceps)',
+                exercises: [
+                    { id: 'pull1', name: 'Dominadas o Jalón Neutro', sets: '4x6-10 / 2-3\'' },
+                    { id: 'pull2', name: 'Remo con Barra', sets: '3x6-8 / 2-3\'' },
+                    { id: 'pull3', name: 'Remo Polea Baja', sets: '3x10-12 / 2-3\'' },
+                    { id: 'pull4', name: 'Facepull', sets: '3x12-15 / 60-90s' },
+                    { id: 'pull5', name: 'Curl Bíceps Barra', sets: '3x8-10 / 60-90s' },
+                    { id: 'pull6', name: 'Curl Martillo', sets: '2x10-12 / 60-90s' },
+                    { id: 'pull7', name: 'Encogimientos Trapecio', sets: '2x10-12 / 60-90s' }
+                ]
+            },
+            'Miércoles': {
+                focus: 'Pierna A (Cuádriceps)',
+                exercises: [
+                    { id: 'leg1', name: 'Sentadilla', sets: '4x6-8 / 2-3\'' },
+                    { id: 'leg2', name: 'Prensa Inclinada', sets: '3x8-10 / 2-3\'' },
+                    { id: 'leg3', name: 'Zancadas/Sentadilla Búlgara', sets: '3x10-12 / 60-90s' },
+                    { id: 'leg4', name: 'Extensiones Cuádriceps', sets: '3x12-15 / 60-90s' },
+                    { id: 'leg5', name: 'Peso Muerto Rumano', sets: '3x8-10 / 2-3\'' },
+                    { id: 'leg6', name: 'Curl Femoral Tumbado', sets: '2x10-12 / 60-90s' },
+                    { id: 'leg7', name: 'Gemelos Sentado', sets: '3x12-15 / 60-90s' }
+                ]
+            },
+            'Jueves': {
+                focus: 'Torso (Hipertrofia)',
+                exercises: [
+                    { id: 'torso1', name: 'Press Inclinado Barra', sets: '3x6-8 / 2-3\'' },
+                    { id: 'torso2', name: 'Remo con Mancuerna', sets: '3x8-10 / 2-3\'' },
+                    { id: 'torso3', name: 'Press Pecho Máquina', sets: '3x10-12 / 2-3\'' },
+                    { id: 'torso4', name: 'Jalón Al Pecho', sets: '3x10-12 / 60-90s' },
+                    { id: 'torso5', name: 'Elev. Laterales Máquina', sets: '3x12-15 / 60-90s' },
+                    { id: 'torso6', name: 'Curl Inclinado', sets: '2x10-12 / 60-90s' },
+                    { id: 'torso7', name: 'Extensión Tríceps Polea', sets: '2x12-15 / 60-90s' }
+                ]
+            },
+            'Viernes': {
+                focus: 'Pierna B (Femoral/Glúteo)',
+                exercises: [
+                    { id: 'legb1', name: 'PM Rumano', sets: '4x6-8 / 2-3\'' },
+                    { id: 'legb2', name: 'Hip Thrust', sets: '3x8-10 / 2-3\'' },
+                    { id: 'legb3', name: 'Sentadilla Hack', sets: '3x10-12 / 2-3\'' },
+                    { id: 'legb4', name: 'Curl Femoral Sentado', sets: '3x10-12 / 60-90s' },
+                    { id: 'legb5', name: 'Aductores Máquina', sets: '2x12-15 / 60-90s' },
+                    { id: 'legb6', name: 'Gemelos De Pie', sets: '3x12-15 / 60-90s' }
+                ]
+            }
+        };
+        // --- Utility ---
+        const getTodayString = () => new Date().toISOString().split('T')[0];
+        // --- Components ---
+        const Icon = ({ name, className }) => <span className={`material-icons-round ${className}`}>{name}</span>;
+        const TabBar = ({ activeTab, setTab }) => (
+            <div className="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-md border-t border-white/10 flex justify-around p-3 z-50 rounded-t-2xl shadow-2xl">
+                {['dashboard', 'diet', 'routine'].map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setTab(tab)}
+                        className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab ? 'text-primary scale-110' : 'text-gray-500'}`}
+                    >
+                        <Icon name={tab === 'dashboard' ? 'grid_view' : tab === 'diet' ? 'restaurant' : 'fitness_center'} className="text-2xl" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{tab === 'routine' ? 'Rutina' : tab === 'diet' ? 'Dieta' : 'Inicio'}</span>
+                    </button>
+                ))}
+            </div>
+        );
+        const Dashboard = ({ data, updateWater }) => {
+            const waterPercent = Math.min((data.water / 4) * 100, 100);
+            // Calculate consumed totals
+            const totals = data.diet.reduce((acc, meal) => {
+                if (meal.consumed) {
+                    acc.calories += meal.calories;
+                    acc.p += (meal.macros ? meal.macros.p : 0);
+                    acc.c += (meal.macros ? meal.macros.c : 0);
+                    acc.f += (meal.macros ? meal.macros.f : 0);
+                }
+                return acc;
+            }, { calories: 0, p: 0, c: 0, f: 0 });
+            const TARGETS = { calories: 2562, p: 250, c: 251, f: 62 };
+            // Cardio Logic (Cycle: 2 days ON, 1 day OFF)
+            const today = new Date();
+            const dayIndex = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+            const cardioStatus = (dayIndex % 3) !== 2 ? "Hoy Toca" : "Descanso";
+            const ProgressBar = ({ label, current, target, colorClass }) => {
+                const pct = Math.min((current / target) * 100, 100);
+                return (
+                    <div className="mb-2 last:mb-0">
+                        <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-400 font-bold">{label}</span>
+                            <span className="text-white">{Math.round(current)} / {target}g</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div className={`h-full ${colorClass}`} style={{ width: `${pct}%`, transition: 'width 0.5s ease-out' }}></div>
+                        </div>
+                    </div>
+                );
+            };
+            return (
+                <div className="space-y-6 animate-fade-in pb-20">
+                    <header className="flex justify-between items-center mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">Hola, Atleta</h1>
+                            <p className="text-sm text-gray-400">Objetivo: Ganancia Muscular</p>
+                        </div>
+                    </header>
+                    {/* Macros Card */}
+                    <div className="bg-surface p-5 rounded-2xl shadow-lg border border-white/5 relative overflow-hidden">
+                        <div className="flex justify-between items-end mb-4 relative z-10">
+                            <span className="text-gray-400 font-medium">Calorías Hoy</span>
+                            <span className="text-3xl font-bold text-white">{totals.calories} <span className="text-sm text-gray-400">/ {TARGETS.calories}</span></span>
+                        </div>
+                        <div className="w-full h-3 bg-black/40 rounded-full overflow-hidden mb-5">
+                            <div
+                                className="h-full bg-gradient-to-r from-primary to-green-400"
+                                style={{ width: `${Math.min((totals.calories / 2000) * 100, 100)}%`, transition: 'width 0.5s ease-out' }}
+                            ></div>
+                        </div>
+                        <div className="space-y-2 relative z-10">
+                            <ProgressBar label="PROTEÍNA" current={totals.p} target={TARGETS.p} colorClass="bg-blue-500" />
+                            <ProgressBar label="CARBOHIDRATOS" current={totals.c} target={TARGETS.c} colorClass="bg-orange-500" />
+                            <ProgressBar label="GRASAS" current={totals.f} target={TARGETS.f} colorClass="bg-yellow-500" />
+                        </div>
+                    </div>
+                    {/* Water Tracker */}
+                    <div className="bg-surface p-0 rounded-2xl shadow-lg border border-white/5 relative overflow-hidden h-40 flex items-center justify-center">
+                        <div className="water-wave" style={{ height: `${waterPercent}%` }}></div>
+                        <div className="z-10 text-center">
+                            <h3 className="text-white font-medium mb-1 drop-shadow-md">Hidratación</h3>
+                            <div className="text-4xl font-black text-white drop-shadow-md">{data.water}<span className="text-lg">L</span> / 4L</div>
+                            <button
+                                onClick={() => updateWater(0.25)}
+                                className="mt-2 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-4 py-1 rounded-full text-sm font-bold transition-colors"
+                            >
+                                + 250ml
+                            </button>
+                        </div>
+                    </div>
+                    {/* Cardio Status */}
+                    <div className={`p-5 rounded-2xl shadow-lg border border-white/5 flex items-center justify-between ${cardioStatus === 'Descanso' ? 'bg-gray-800' : 'bg-gradient-to-br from-orange-500/20 to-red-500/20'}`}>
+                        <div>
+                            <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">Cardio Cíclico</p>
+                            <h2 className={`text-2xl font-black mt-1 ${cardioStatus === 'Descanso' ? 'text-gray-300' : 'text-orange-400'}`}>
+                                {cardioStatus.toUpperCase()}
+                            </h2>
+                        </div>
+                        <Icon name={cardioStatus === 'Descanso' ? 'bedtime' : 'directions_run'} className={`text-4xl ${cardioStatus === 'Descanso' ? 'text-gray-500' : 'text-orange-400'}`} />
+                    </div>
+                </div>
+            );
+        };
+        const Diet = ({ diet, updateDiet, toggleMeal, mockScan }) => {
+            return (
+                <div className="space-y-4 pb-20">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold">Plan Nutricional</h2>
+                    </div>
+                    {diet.map((meal, index) => (
+                        <div key={meal.id} className={`p-4 rounded-xl border transition-all duration-300 ${meal.consumed ? 'bg-primary/5 border-primary/30' : 'bg-surface border-white/5'}`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 className={`font-bold ${meal.consumed ? 'text-primary' : 'text-white'}`}>{meal.name}</h3>
+                                    <div className="flex gap-2 mt-1 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                                        <span className="text-blue-400">P: {meal.macros?.p}</span>
+                                        <span className="text-orange-400">C: {meal.macros?.c}</span>
+                                        <span className="text-yellow-400">G: {meal.macros?.f}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                    <span className="text-xs text-gray-400 font-mono bg-black/20 px-2 py-0.5 rounded">{meal.calories} kcal</span>
+                                    <button
+                                        onClick={() => toggleMeal(index)}
+                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${meal.consumed ? 'bg-primary border-primary' : 'border-gray-600 hover:border-gray-400'}`}
+                                    >
+                                        {meal.consumed && <Icon name="check" className="text-black text-sm font-bold" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea
+                                className={`w-full bg-black/20 text-sm p-3 rounded-lg border focus:border-primary/50 focus:outline-none resize-none transition-colors ${meal.consumed ? 'text-gray-500 border-transparent' : 'text-gray-300 border-white/5'}`}
+                                rows="2"
+                                value={meal.items}
+                                onChange={(e) => updateDiet(index, e.target.value)}
+                            />
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+        // --- Advanced Components ---
+        const BodyStatsForm = ({ onClose, onSave }) => {
+            const [formData, setFormData] = useState({
+                weight: '', imc: '', fat: '', muscle: '',
+                water: '', protein: '', visceral: '', bone: ''
+            });
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubmit = () => {
+                // Basic validation
+                if (!formData.weight && !formData.muscle) {
+                    alert("Introduce al menos el Peso o Músculo.");
+                    return;
+                }
+                onSave({
+                    id: Date.now(),
+                    date: getTodayString(),
+                    ...Object.keys(formData).reduce((acc, key) => {
+                        acc[key] = parseFloat(formData[key]) || 0;
+                        return acc;
+                    }, {})
+                });
+                onClose();
+            };
+
+            const fields = [
+                { name: 'weight', label: 'Peso (kg)', icon: 'monitor_weight' },
+                { name: 'fat', label: 'Grasa (%)', icon: 'opacity' },
+                { name: 'muscle', label: 'Músculo (kg)', icon: 'fitness_center' },
+                { name: 'water', label: 'Agua (%)', icon: 'water_drop' },
+                { name: 'visceral', label: 'Visceral', icon: 'local_fire_department' },
+                { name: 'protein', label: 'Proteína (%)', icon: 'egg_alt' },
+                { name: 'bone', label: 'Hueso (kg)', icon: 'accessibility' },
+                { name: 'imc', label: 'IMC', icon: 'calculate' },
+            ];
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur p-4 animate-fade-in">
+                    <div className="bg-surface border border-white/10 p-6 rounded-2xl w-full max-w-sm shadow-2xl h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <Icon name="add_circle" className="text-primary" /> Nuevo Registro
+                            </h2>
+                            <button onClick={onClose}><Icon name="close" /></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {fields.map(f => (
+                                <div key={f.name}>
+                                    <label className="text-xs text-gray-400 font-bold uppercase block mb-1">{f.label}</label>
+                                    <div className="relative">
+                                        <Icon name={f.icon} className="absolute left-3 top-2.5 text-gray-500 text-sm" />
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            name={f.name}
+                                            value={formData[f.name]}
+                                            onChange={handleChange}
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg py-2 pl-9 pr-2 text-white focus:border-primary/50 outline-none text-sm"
+                                            placeholder="0.0"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={handleSubmit} className="w-full mt-6 bg-primary text-black font-bold py-3 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">
+                            Guardar Datos
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const StatCard = ({ label, value, unit, prevValue, inverse = false }) => {
+            const diff = value - prevValue;
+            const isBetter = inverse ? diff < 0 : diff > 0; // Less fat is better (inverse=true), More muscle is better (inverse=false)
+
+            // Color logic: 
+            // If prevValue is undefined (first entry), show neutral.
+            // If diff is 0, neutral.
+            // otherwise check isBetter.
+
+            let colorClass = "text-gray-400";
+            let arrow = "";
+
+            if (prevValue !== undefined && diff !== 0) {
+                colorClass = isBetter ? "text-primary" : "text-red-500";
+                arrow = diff > 0 ? "⬆" : "⬇";
+            }
+
+            return (
+                <div className="bg-surface p-4 rounded-xl border border-white/5 flex flex-col justify-between">
+                    <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-1">{label}</p>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold text-white">{value}</span>
+                        <span className="text-xs text-gray-400 font-bold">{unit}</span>
+                    </div>
+                    {prevValue !== undefined && (
+                        <p className={`text-xs font-mono font-bold mt-1 ${colorClass}`}>
+                            {diff > 0 ? '+' : ''}{diff.toFixed(1)}{unit} {arrow}
+                        </p>
+                    )}
+                </div>
+            );
+        };
+
+        const Progress = ({ historyLog, bodyStatsLog, exercises, onAddBodyStat }) => {
+            const [mode, setMode] = useState('body'); // 'lifts' or 'body'
+            const [showBodyForm, setShowBodyForm] = useState(false);
+
+            // --- LIFTS LOGIC ---
+            // Flatten all exercises for the dropdown
+            const allExercises = useMemo(() => {
+                const list = [];
+                Object.values(WORKOUT_ROUTINE).forEach(day => {
+                    day.exercises.forEach(ex => list.push(ex));
+                });
+                return list;
+            }, []);
+
+            const [selectedId, setSelectedId] = useState('push1'); // Default: Press Banca
+
+            // Prepare Data Lifts
+            const liftData = useMemo(() => {
+                return historyLog
+                    .filter(e => e.exerciseId === selectedId)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+            }, [historyLog, selectedId]);
+
+            // --- BODY LOGIC ---
+            const sortedBodyArgs = useMemo(() => {
+                return [...bodyStatsLog].sort((a, b) => new Date(a.date) - new Date(b.date));
+            }, [bodyStatsLog]);
+
+            const currentBody = sortedBodyArgs[sortedBodyArgs.length - 1] || {};
+            const prevBody = sortedBodyArgs[sortedBodyArgs.length - 2] || {};
+
+            // --- SHARED CHART LOGIC ---
+            // We reuse the SVG logic for both. We just need to map data to { label, value }
+            const getChartData = () => {
+                if (mode === 'lifts') {
+                    return liftData.map(d => ({ date: d.date, value: d.maxKg }));
+                } else {
+                    // Default to Weight for Body Chart, or maybe make it selectable? 
+                    // Let's stick to Muscle Mass as it's the goal "Ganancia Muscular"
+                    return sortedBodyArgs.map(d => ({ date: d.date, value: d.muscle })); // Plotting Muscle
+                }
+            };
+
+            const chartPoints = getChartData();
+
+            // Chart Dimensions
+            const height = 200;
+            const width = 300;
+            const padding = 20;
+
+            // Calculate Scales
+            const maxVal = Math.max(...chartPoints.map(d => d.value), 0) * 1.05;
+            const minVal = Math.max(Math.min(...chartPoints.map(d => d.value), 0) * 0.95, 0);
+
+            const getX = (index) => {
+                if (chartPoints.length <= 1) return width / 2;
+                return padding + (index / (chartPoints.length - 1)) * (width - 2 * padding);
+            };
+
+            const getY = (val) => {
+                if (maxVal === minVal) return height / 2;
+                return height - padding - ((val - minVal) / (maxVal - minVal)) * (height - 2 * padding);
+            };
+
+            const pathD = chartPoints.length > 1
+                ? 'M' + chartPoints.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' L')
+                : '';
+
+            return (
+                <div className="pb-24 animate-fade-in">
+                    {/* Header & Toggle */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="bg-surface p-1 rounded-xl border border-white/10 flex">
+                            <button
+                                onClick={() => setMode('body')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'body' ? 'bg-primary text-black shadow-lg' : 'text-gray-400'}`}
+                            >
+                                Corporal
+                            </button>
+                            <button
+                                onClick={() => setMode('lifts')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'lifts' ? 'bg-primary text-black shadow-lg' : 'text-gray-400'}`}
+                            >
+                                Fuerza
+                            </button>
+                        </div>
+                        {mode === 'body' && (
+                            <button onClick={() => setShowBodyForm(true)} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black shadow-lg shadow-primary/20">
+                                <Icon name="add" className="font-bold" />
+                            </button>
+                        )}
+                    </div>
+
+                    {mode === 'lifts' && (
+                        <div className="mb-4">
+                            <select
+                                value={selectedId}
+                                onChange={(e) => setSelectedId(e.target.value)}
+                                className="w-full bg-surface border border-white/10 rounded-xl p-3 text-white focus:border-primary/50 outline-none text-sm font-bold"
+                            >
+                                {allExercises.map(ex => (
+                                    <option key={ex.id} value={ex.id}>{ex.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* Chart Area */}
+                    <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg relative overflow-hidden mb-6">
+                        <h3 className="text-xs uppercase font-bold text-gray-500 mb-2">
+                            {mode === 'lifts' ? 'Progreso en Kilos' : 'Evolución Muscular (kg)'}
+                        </h3>
+                        {chartPoints.length > 0 ? (
+                            <>
+                                <div className="absolute top-4 right-4 text-right">
+                                    <span className="block text-3xl font-black text-white">{chartPoints[chartPoints.length - 1].value}</span>
+                                    <span className="text-xs text-gray-500 font-bold">{mode === 'lifts' ? 'KG (Max)' : 'KG (Músculo)'}</span>
+                                </div>
+                                <div className="h-[150px] w-full flex items-center justify-center mt-4">
+                                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+                                        {[0, 0.5, 1].map(pct => (
+                                            <line key={pct} x1={padding} y1={padding + pct * (height - 2 * padding)} x2={width - padding} y2={padding + pct * (height - 2 * padding)} stroke="#333" strokeWidth="1" strokeDasharray="4 4" />
+                                        ))}
+                                        <path d={pathD} fill="none" stroke="#B6F262" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                        {chartPoints.length > 1 && (
+                                            <path d={`${pathD} L${getX(chartPoints.length - 1)},${height} L${getX(0)},${height} Z`} fill="url(#gradient)" opacity="0.2" />
+                                        )}
+                                        {chartPoints.map((d, i) => (
+                                            <circle key={i} cx={getX(i)} cy={getY(d.value)} r="3" fill="#121212" stroke="#B6F262" strokeWidth="2" />
+                                        ))}
+                                        <defs>
+                                            <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+                                                <stop offset="0%" stopColor="#B6F262" />
+                                                <stop offset="100%" stopColor="#B6F262" stopOpacity="0" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="h-32 flex items-center justify-center text-gray-500 text-sm">Sin datos aún</div>
+                        )}
+                    </div>
+
+                    {/* Body Stats Grid */}
+                    {mode === 'body' && (
+                        <div className="grid grid-cols-2 gap-3">
+                            <StatCard label="Peso" value={currentBody.weight || '-'} unit="kg" prevValue={prevBody.weight} inverse={true} />
+                            <StatCard label="Músculo" value={currentBody.muscle || '-'} unit="kg" prevValue={prevBody.muscle} inverse={false} />
+                            <StatCard label="Grasa" value={currentBody.fat || '-'} unit="%" prevValue={prevBody.fat} inverse={true} />
+                            <StatCard label="Visceral" value={currentBody.visceral || '-'} unit="" prevValue={prevBody.visceral} inverse={true} />
+                            <StatCard label="Agua" value={currentBody.water || '-'} unit="%" prevValue={prevBody.water} inverse={false} />
+                            <StatCard label="Proteína" value={currentBody.protein || '-'} unit="%" prevValue={prevBody.protein} inverse={false} />
+                            <StatCard label="Hueso" value={currentBody.bone || '-'} unit="kg" prevValue={prevBody.bone} inverse={false} />
+                            <StatCard label="IMC" value={currentBody.imc || '-'} unit="" prevValue={prevBody.imc} inverse={true} />
+                        </div>
+                    )}
+
+                    {/* Modals */}
+                    {showBodyForm && <BodyStatsForm onClose={() => setShowBodyForm(false)} onSave={onAddBodyStat} />}
+                </div>
+            );
+        };
+
+        const Timer = ({ duration, isActive, onComplete, onAdd }) => {
+            const [timeLeft, setTimeLeft] = useState(duration);
+
+            useEffect(() => {
+                setTimeLeft(duration);
+            }, [duration, isActive]);
+
+            useEffect(() => {
+                let interval;
+                if (isActive && timeLeft > 0) {
+                    interval = setInterval(() => {
+                        setTimeLeft(prev => prev - 1);
+                    }, 1000);
+                } else if (timeLeft === 0 && isActive) {
+                    onComplete();
+                }
+                return () => clearInterval(interval);
+            }, [isActive, timeLeft, onComplete]);
+
+            if (!isActive) return null;
+
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            const progress = (timeLeft / duration) * 100;
+
+            return (
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-surface/95 backdrop-blur border border-primary/20 p-3 rounded-2xl shadow-2xl z-40 flex items-center justify-between animate-slide-up">
+                    <div className="flex items-center gap-4">
+                        <div className="relative w-12 h-12 flex items-center justify-center">
+                            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path className="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                                <path className="text-primary transition-all duration-1000 ease-linear" strokeDasharray={`${progress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                            </svg>
+                            <span className="absolute text-xs font-bold text-white font-mono">
+                                {mins}:{secs < 10 ? '0' : ''}{secs}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Descanso</p>
+                            <p className="text-sm font-semibold text-white">Recupérate bien</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={onAdd} className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors">
+                            <Icon name="more_time" className="text-xl" />
+                        </button>
+                        <button onClick={onComplete} className="bg-red-500/20 hover:bg-red-500/40 text-red-500 p-2 rounded-full transition-colors">
+                            <Icon name="close" className="text-xl" />
+                        </button>
+                    </div>
+                    {/* Audio element for alarm */}
+                    <audio id="timer-alarm" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+                </div>
+            );
+        };
+
+        const SetRow = ({ idx, set, onUpdate, onCheck }) => {
+            return (
+                <div className={`grid grid-cols-10 gap-2 items-center transition-all ${set.done ? 'opacity-50' : 'opacity-100'}`}>
+                    <div className="col-span-1 flex justify-center">
+                        <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-gray-500">
+                            {idx + 1}
+                        </div>
+                    </div>
+                    <div className="col-span-2">
+                        <input
+                            type="number"
+                            placeholder="kg"
+                            value={set.kg}
+                            onChange={(e) => onUpdate('kg', e.target.value)}
+                            className="w-full bg-black/20 border border-white/5 rounded text-center text-sm py-1 focus:border-primary/50 outline-none text-white placeholder-gray-700"
+                        />
+                    </div>
+                    <div className="col-span-2">
+                        <input
+                            type="number"
+                            placeholder="reps"
+                            value={set.reps}
+                            onChange={(e) => onUpdate('reps', e.target.value)}
+                            className="w-full bg-black/20 border border-white/5 rounded text-center text-sm py-1 focus:border-primary/50 outline-none text-white placeholder-gray-700"
+                        />
+                    </div>
+                    <div className="col-span-1"></div>
+                    <div className="col-span-4 flex justify-end">
+                        <button
+                            onClick={() => onCheck(!set.done)}
+                            className={`w-full py-1.5 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all ${set.done ? 'bg-primary text-black shadow-lg shadow-primary/20 scale-95' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                        >
+                            {set.done ? <Icon name="check" className="text-sm" /> : <span>Completar</span>}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Routine = ({ history, exercises, updateSet, triggerTimer, timerState, setTimerState }) => {
+            const [selectedDay, setSelectedDay] = useState('Lunes');
+
+            // Helper to parsing "4x6-8 / 2-3'"
+            const parseRoutine = (setStr) => {
+                // Example: "4x6-8 / 2-3'"
+                // Regex to find sets (start of string)
+                const setsMatch = setStr.match(/^(\d+)x/);
+                const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
+
+                // Rest parsing
+                let rest = 90; // default 90s
+                if (setStr.includes("2-3'")) rest = 150; // avg of 120-180
+                if (setStr.includes("60-90s")) rest = 75;
+
+                return { sets, rest };
+            };
+
+            const dayRoutine = WORKOUT_ROUTINE[selectedDay];
+
+            return (
+                <div className="h-full flex flex-col pb-24">
+                    <div className="flex overflow-x-auto gap-2 mb-4 pb-2 no-scrollbar px-1">
+                        {DAYS.map(day => (
+                            <button
+                                key={day}
+                                onClick={() => setSelectedDay(day)}
+                                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-bold transition-all ${selectedDay === day ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'bg-surface text-gray-400'}`}
+                            >
+                                {day}
+                            </button>
+                        ))}
+                    </div>
+
+                    {dayRoutine ? (
+                        <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className="text-lg font-bold text-white uppercase tracking-wider">{dayRoutine.focus}</h2>
+                            </div>
+                            {dayRoutine.exercises.map((ex) => {
+                                const meta = parseRoutine(ex.sets);
+                                const exerciseData = exercises[ex.id] || { sets: [] };
+
+                                // Ensure we have enough set slots based on the routine 
+                                // (Auto-migration/Initialization)
+                                const currentSets = exerciseData.sets || [];
+                                const displaySets = [];
+                                for (let i = 0; i < meta.sets; i++) {
+                                    displaySets.push(currentSets[i] || { kg: '', reps: '', done: false });
+                                }
+
+                                return (
+                                    <div key={ex.id} className="bg-surface rounded-xl p-4 border border-white/5">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="font-bold text-white text-base leading-tight w-3/4">{ex.name}</h3>
+                                            <span className="text-xs font-mono text-gray-500 bg-black/20 px-2 py-1 rounded">{ex.sets}</span>
+                                        </div>
+
+                                        {/* Headers */}
+                                        <div className="grid grid-cols-10 gap-2 mb-2 text-[10px] uppercase font-bold text-gray-500 tracking-wider text-center">
+                                            <div className="col-span-1">Set</div>
+                                            <div className="col-span-2">Kg</div>
+                                            <div className="col-span-2">Reps</div>
+                                            <div className="col-span-1"></div>
+                                            <div className="col-span-4">Estado</div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {displaySets.map((set, idx) => (
+                                                <SetRow
+                                                    key={idx}
+                                                    idx={idx}
+                                                    set={set}
+                                                    onUpdate={(field, val) => updateSet(ex.id, idx, field, val)}
+                                                    onCheck={(done) => {
+                                                        const wasDone = set.done;
+                                                        updateSet(ex.id, idx, 'done', done);
+                                                        // Trigger Timer if checking (not unchecking)
+                                                        if (done && !wasDone) {
+                                                            triggerTimer(meta.rest);
+                                                        }
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center h-40 text-gray-500">
+                            Descanso / No asignado
+                        </div>
+                    )}
+
+                    <Timer
+                        duration={timerState.duration}
+                        isActive={timerState.isActive}
+                        onComplete={() => {
+                            setTimerState(prev => ({ ...prev, isActive: false }));
+                            // document.getElementById('timer-alarm')?.play();
+                            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                            alert("¡Tiempo de descanso terminado! 🔔");
+                        }}
+                        onAdd={() => setTimerState(prev => ({ ...prev, duration: prev.duration + 30 }))}
+                    />
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [tab, setTab] = useState('dashboard');
+            // Timer State (Lifted Up)
+            const [timerState, setTimerState] = useState({ isActive: false, duration: 60 });
+
+            // State
+            const [data, setData] = useState(() => {
+                const today = getTodayString();
+                const savedJson = localStorage.getItem(VERSION_KEY);
+                let saved = savedJson ? JSON.parse(savedJson) : null;
+
+                // MOCK DATA GENERATOR for Demo
+                const mockHistory = [
+                    { date: '2023-10-01', exerciseId: 'push1', maxKg: 60 },
+                    { date: '2023-10-08', exerciseId: 'push1', maxKg: 65 },
+                    { date: '2023-10-15', exerciseId: 'push1', maxKg: 65 },
+                    { date: '2023-10-22', exerciseId: 'push1', maxKg: 70 },
+                ];
+
+                // User's provided Zepp Life Data
+                const userStatsMock = [{
+                    id: 1,
+                    date: '2023-10-01', // Set to past to allow "new" entries to show delta
+                    weight: 104,
+                    imc: 33.1,
+                    fat: 34.2,
+                    water: 46.9,
+                    protein: 15.5,
+                    visceral: 13,
+                    muscle: 65.45,
+                    bone: 3.52
+                }];
+
+                // Default initial state
+                if (!saved) {
+                    return {
+                        water: 0,
+                        diet: DEFAULT_DIET,
+                        history: {},
+                        exercises: {},
+                        historyLog: mockHistory, // New Field
+                        bodyStatsLog: userStatsMock, // New Field
+                        lastActiveDate: today
+                    };
+                }
+
+                // Initial migration for existing users
+                if (!saved.historyLog) {
+                    saved.historyLog = mockHistory;
+                }
+                if (!saved.bodyStatsLog) {
+                    saved.bodyStatsLog = userStatsMock;
+                }
+
+                // Daily Reset Logic
+                if (saved.lastActiveDate !== today) {
+                    // Reset Logic needs to define what happens to Exercises?
+                    // User said: "poner todo a cero MENOS EL PESO".
+                    // So we must KEEP the `kg` and `reps` but set `done` to false.
+                    // Loop through all exercises
+                    const resetExercises = {};
+                    Object.keys(saved.exercises).forEach(key => {
+                        const ex = saved.exercises[key];
+                        // If it's the new array format set `done` to false
+                        if (ex.sets && Array.isArray(ex.sets)) {
+                            resetExercises[key] = {
+                                ...ex,
+                                sets: ex.sets.map(s => ({ ...s, done: false }))
+                            };
+                        } else {
+                            // Legacy format migration protection
+                            resetExercises[key] = ex;
+                        }
+                    });
+
+                    return {
+                        ...saved,
+                        water: 0,
+                        diet: saved.diet.map(meal => ({ ...meal, consumed: false })),
+                        exercises: resetExercises,
+                        lastActiveDate: today
+                    };
+                }
+
+                return saved;
+            });
+            // Persistence
+            useEffect(() => {
+                localStorage.setItem(VERSION_KEY, JSON.stringify(data));
+            }, [data]);
+
+            const triggerTimer = (seconds) => {
+                setTimerState({ isActive: true, duration: seconds });
+            };
+
+            // Enhanced Exercise Update (Per Set)
+            const updateSet = (exerciseId, setIndex, field, value) => {
+                setData(prev => {
+                    const prevEx = prev.exercises[exerciseId] || { sets: [] };
+                    const currentSets = [...(prevEx.sets || [])];
+
+                    // Fill gaps if strictly setting a high index (unlikely with map)
+                    while (currentSets.length <= setIndex) {
+                        currentSets.push({ kg: '', reps: '', done: false });
+                    }
+
+                    // Update specific set
+                    currentSets[setIndex] = { ...currentSets[setIndex], [field]: value };
+
+                    // --- History Log Logic ---
+                    // Calculate new daily max for this exercise if checking 'done' or updating 'kg'.
+                    // (Actually we can just calc 'max' of all done sets)
+                    const tempSets = currentSets.map((s, i) => i === setIndex ? { ...s, [field]: value } : s);
+                    const doneSets = tempSets.filter(s => s.done || (field === 'done' && value === true));
+                    // Note: 'doneSets' logic above is slightly imperfect as 'value' might be kg. 
+                    // Let's rely on the final state of 'currentSets'.
+
+                    let newHistoryLog = prev.historyLog || [];
+
+                    // Only update history if a set is DONE
+                    const isAnyDone = currentSets.some(s => s.done) || (field === 'done' && value === true);
+
+                    if (isAnyDone) {
+                        const today = getTodayString();
+                        const dailyMax = Math.max(0, ...currentSets.map(s => (s.done && Number(s.kg)) || 0));
+                        // Check if we need to update today's log
+                        // If 'value' is kg and set is done, include it.
+                        // Ideally we compute full max from `currentSets`.
+
+                        // We need to re-scan `currentSets` CAREFULLY.
+                        // If we are UPDATING 'kg', and it IS 'done', then use new value.
+                        // If we are UPDATING 'done' to true, use 'kg'.
+
+                        // Better calculation: use the `currentSets` which already has the new value applied in memory above (line 579)
+                        const realSets = currentSets;
+                        const calculatedMax = Math.max(0, ...realSets.map(s => s.done ? (Number(s.kg) || 0) : 0));
+
+                        if (calculatedMax > 0) {
+                            const idx = newHistoryLog.findIndex(h => h.date === today && h.exerciseId === exerciseId);
+                            if (idx >= 0) {
+                                // Update existing
+                                const entry = newHistoryLog[idx];
+                                if (calculatedMax > entry.maxKg) {
+                                    // Optimization: only update if bigger? Or always sync to current max?
+                                    // Always sync to current max matches reality.
+                                    newHistoryLog = [...newHistoryLog];
+                                    newHistoryLog[idx] = { ...entry, maxKg: calculatedMax };
+                                }
+                            } else {
+                                // Insert new
+                                newHistoryLog = [...newHistoryLog, { date: today, exerciseId, maxKg: calculatedMax }];
+                            }
+                        }
+                    }
+
+                    return {
+                        ...prev,
+                        historyLog: newHistoryLog,
+                        exercises: {
+                            ...prev.exercises,
+                            [exerciseId]: {
+                                ...prevEx,
+                                sets: currentSets
+                            }
+                        }
+                    };
+                });
+            };
+
+            const addBodyStat = (newStat) => {
+                setData(prev => ({
+                    ...prev,
+                    bodyStatsLog: [...(prev.bodyStatsLog || []), newStat]
+                }));
+            };
+
+            // Simple stubs for props not changed in this step (Mocking for context)
+            const updateWater = (amount) => {
+                setData(prev => ({ ...prev, water: Math.min(Math.round((prev.water + amount) * 100) / 100, 5) }));
+            };
+            const updateDiet = (index, newText) => {
+                const newDiet = [...data.diet];
+                newDiet[index].items = newText;
+                setData(prev => ({ ...prev, diet: newDiet }));
+            };
+            const toggleMeal = (index) => {
+                const newDiet = [...data.diet];
+                newDiet[index].consumed = !newDiet[index].consumed;
+                setData(prev => ({ ...prev, diet: newDiet }));
+            };
+
+            return (
+                <div className="app-container font-sans text-gray-100 p-4">
+                    {tab === 'dashboard' && <Dashboard data={data} updateWater={updateWater} />}
+                    {tab === 'diet' && <Diet diet={data.diet} updateDiet={updateDiet} toggleMeal={toggleMeal} />}
+                    {tab === 'routine' && (
+                        <Routine
+                            history={data.history}
+                            exercises={data.exercises}
+                            updateSet={updateSet}
+                            triggerTimer={triggerTimer}
+                            timerState={timerState}
+                            setTimerState={setTimerState}
+                        />
+                    )}
+                    {tab === 'progress' && (
+                        <Progress
+                            historyLog={data.historyLog || []}
+                            bodyStatsLog={data.bodyStatsLog || []}
+                            exercises={WORKOUT_ROUTINE}
+                            onAddBodyStat={addBodyStat}
+                        />
+                    )}
+
+                    {/* Tab Bar updated locally to avoid strict prop drilling issues in full rewrite */}
+                    <div className="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-md border-t border-white/10 flex justify-around p-3 z-50 rounded-t-2xl shadow-2xl">
+                        {['dashboard', 'diet', 'routine', 'progress'].map(t => (
+                            <button
+                                key={t}
+                                onClick={() => setTab(t)}
+                                className={`flex flex-col items-center gap-1 transition-all duration-300 ${tab === t ? 'text-primary scale-110' : 'text-gray-500'}`}
+                            >
+                                <Icon name={t === 'dashboard' ? 'grid_view' : t === 'diet' ? 'restaurant' : t === 'routine' ? 'fitness_center' : 'show_chart'} className="text-2xl" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">
+                                    {t === 'routine' ? 'Rutina' : t === 'diet' ? 'Dieta' : t === 'progress' ? 'Progres' : 'Inicio'}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                    {/* <TabBar activeTab={tab} setTab={setTab} /> Removed in favor of inline for this edit to ensure sync */}
+                </div>
+            );
+        };
+        // Mount
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+    </script>
+</body>
+
+</html>
