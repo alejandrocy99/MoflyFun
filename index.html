@@ -4,36 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Muscle & Macro Architect</title>
+    <title>Mofly Fun</title>
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#701a75">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    <!-- PWA Manifest (URL Encoded for stability) -->
-    <link rel="manifest"
-        href='data:application/json;charset=utf-8,%7B%22name%22%3A%22Muscle%20%26%20Macro%20Architect%22%2C%22short_name%22%3A%22MMA%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1a1a%22%2C%22theme_color%22%3A%22%231a1a1a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F2554%2F2554039.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
+    <!-- Icon -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3790/3790109.png">
+
     <!-- CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Icons -->
+
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['"Fredoka One"', 'cursive'],
                     },
                     colors: {
-                        primary: '#B6F262', // Neon Lime
-                        surface: '#242424',
-                        background: '#121212',
-                        accent: '#E0E0E0',
+                        brand: {
+                            purple: '#701a75', // Brand Base
+                            pink: '#f472b6',
+                            yellow: '#facc15',
+                            cyan: '#22d3ee',
+                            dark: '#111827',
+                        }
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 3s infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.8)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
                     }
                 }
             }
@@ -41,979 +69,885 @@
     </script>
     <style>
         body {
-            background-color: #121212;
-            color: #E0E0E0;
+            background-color: #111827;
+            /* brand-dark */
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Fun Background Pattern */
+        .bg-pattern {
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-color: #111827;
+            opacity: 0.1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #121212;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 2px;
+            background: #f472b6;
+            border-radius: 3px;
         }
 
-        .water-wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            transition: height 0.5s ease-in-out;
-            background: linear-gradient(180deg, #4FC3F7 0%, #0288D1 100%);
-            opacity: 0.6;
-            z-index: 0;
+        .text-shadow {
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
         }
 
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            min-height: 100vh;
-            padding-bottom: 80px;
+        .text-shadow-lg {
+            text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 
 <body>
     <div id="root"></div>
+    <div class="bg-pattern"></div>
+
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
-        // --- Data & Constants ---
-        const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-        const VERSION_KEY = 'gym_data_v5';
-        const DEFAULT_DIET = [
-            { id: 'breakfast', name: 'Desayuno', items: 'Creatina + 3 Huevos plancha + 1 Tostada', calories: 505, macros: { p: 36, c: 45, f: 20 }, consumed: false },
-            { id: 'lunch', name: 'Comida', items: '125g Arroz + 200g Pollo/Ternera + Ensalada (50g Maíz, 80g Atún)', calories: 1005, macros: { p: 70, c: 140, f: 15 }, consumed: false },
-            { id: 'snack', name: 'Merienda', items: '2 Yogures + 1 cazo Proteína + 30g Nueces', calories: 610, macros: { p: 53, c: 33, f: 30 }, consumed: false },
-            { id: 'dinner', name: 'Cena', items: '2 Huevos + 80g Atún + 1 Tostada + 1 Cuch. Aceite', calories: 515, macros: { p: 60, c: 25, f: 25 }, consumed: false },
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- DATA ---
+        const CHALLENGES = [
+            { id: 1, text: "Mano en la cabeza todo el turno", verbal: true },
+            { id: 2, text: "Habla con la lengua fuera", verbal: true },
+            { id: 3, text: "Salta mientras explicas", verbal: true },
+            { id: 4, text: "Canta en lugar de hablar", verbal: true },
+            { id: 5, text: "De espaldas al equipo", verbal: true },
+            { id: 6, text: "Habla como un robot", verbal: true },
+            { id: 7, text: "Sin usar la letra 'E'", verbal: true },
+            { id: 8, text: "Imita a un famoso (di cuál)", verbal: true },
+            { id: 9, text: "Ojos cerrados", verbal: true },
+            { id: 10, text: "Susurrando muy bajito", verbal: true },
+            // Mímica exclusive/compatible challenges could be added
         ];
-        const WORKOUT_ROUTINE = {
-            'Lunes': {
-                focus: 'Empuje (Pecho/Hombro/Tríceps)',
-                exercises: [
-                    { id: 'push1', name: 'Press Banca Plano Barra', sets: '4x6-8 / 2-3\'' },
-                    { id: 'push2', name: 'Press Inclinado Mancuernas', sets: '3x8-10 / 2-3\'' },
-                    { id: 'push3', name: 'Press Militar Mancuernas', sets: '3x8-10 / 2-3\'' },
-                    { id: 'push4', name: 'Aperturas en Polea', sets: '3x12-15 / 60-90s' },
-                    { id: 'push5', name: 'Elevaciones Laterales', sets: '3x12-15 / 60-90s' },
-                    { id: 'push6', name: 'Fondos o Press Cerrado', sets: '3x8-10 / 2-3\'' },
-                    { id: 'push7', name: 'Tríceps Polea Cuerda', sets: '2x12-15 / 60-90s' }
-                ]
-            },
-            'Martes': {
-                focus: 'Tracción (Espalda/Bíceps)',
-                exercises: [
-                    { id: 'pull1', name: 'Dominadas o Jalón Neutro', sets: '4x6-10 / 2-3\'' },
-                    { id: 'pull2', name: 'Remo con Barra', sets: '3x6-8 / 2-3\'' },
-                    { id: 'pull3', name: 'Remo Polea Baja', sets: '3x10-12 / 2-3\'' },
-                    { id: 'pull4', name: 'Facepull', sets: '3x12-15 / 60-90s' },
-                    { id: 'pull5', name: 'Curl Bíceps Barra', sets: '3x8-10 / 60-90s' },
-                    { id: 'pull6', name: 'Curl Martillo', sets: '2x10-12 / 60-90s' },
-                    { id: 'pull7', name: 'Encogimientos Trapecio', sets: '2x10-12 / 60-90s' }
-                ]
-            },
-            'Miércoles': {
-                focus: 'Pierna A (Cuádriceps)',
-                exercises: [
-                    { id: 'leg1', name: 'Sentadilla', sets: '4x6-8 / 2-3\'' },
-                    { id: 'leg2', name: 'Prensa Inclinada', sets: '3x8-10 / 2-3\'' },
-                    { id: 'leg3', name: 'Zancadas/Sentadilla Búlgara', sets: '3x10-12 / 60-90s' },
-                    { id: 'leg4', name: 'Extensiones Cuádriceps', sets: '3x12-15 / 60-90s' },
-                    { id: 'leg5', name: 'Peso Muerto Rumano', sets: '3x8-10 / 2-3\'' },
-                    { id: 'leg6', name: 'Curl Femoral Tumbado', sets: '2x10-12 / 60-90s' },
-                    { id: 'leg7', name: 'Gemelos Sentado', sets: '3x12-15 / 60-90s' }
-                ]
-            },
-            'Jueves': {
-                focus: 'Torso (Hipertrofia)',
-                exercises: [
-                    { id: 'torso1', name: 'Press Inclinado Barra', sets: '3x6-8 / 2-3\'' },
-                    { id: 'torso2', name: 'Remo con Mancuerna', sets: '3x8-10 / 2-3\'' },
-                    { id: 'torso3', name: 'Press Pecho Máquina', sets: '3x10-12 / 2-3\'' },
-                    { id: 'torso4', name: 'Jalón Al Pecho', sets: '3x10-12 / 60-90s' },
-                    { id: 'torso5', name: 'Elev. Laterales Máquina', sets: '3x12-15 / 60-90s' },
-                    { id: 'torso6', name: 'Curl Inclinado', sets: '2x10-12 / 60-90s' },
-                    { id: 'torso7', name: 'Extensión Tríceps Polea', sets: '2x12-15 / 60-90s' }
-                ]
-            },
-            'Viernes': {
-                focus: 'Pierna B (Femoral/Glúteo)',
-                exercises: [
-                    { id: 'legb1', name: 'PM Rumano', sets: '4x6-8 / 2-3\'' },
-                    { id: 'legb2', name: 'Hip Thrust', sets: '3x8-10 / 2-3\'' },
-                    { id: 'legb3', name: 'Sentadilla Hack', sets: '3x10-12 / 2-3\'' },
-                    { id: 'legb4', name: 'Curl Femoral Sentado', sets: '3x10-12 / 60-90s' },
-                    { id: 'legb5', name: 'Aductores Máquina', sets: '2x12-15 / 60-90s' },
-                    { id: 'legb6', name: 'Gemelos De Pie', sets: '3x12-15 / 60-90s' }
-                ]
-            }
+
+        const WORD_DB = {
+            cine: [
+                "Titanic", "Star Wars", "El Padrino", "Avatar", "Harry Potter",
+                "El Señor de los Anillos", "Matrix", "Jurassic Park", "El Rey León", "Frozen",
+                "Avengers", "Batman", "Spider-Man", "Shrek", "Toy Story",
+                "Piratas del Caribe", "Indiana Jones", "Volver al Futuro", "Forrest Gump", "Gladiador",
+                "Coco", "Up", "Wall-E", "Buscando a Nemo", "Los Increíbles",
+                "Joker", "Inception", "Interstellar", "Pulp Fiction", "Fight Club",
+                "La La Land", "El Resplandor", "Psicosis", "E.T.", "Tiburón",
+                "Rocky", "Terminator", "Alien", "Blade Runner", "El Club de la Lucha",
+                "Cadena Perpetua", "El Silencio de los Corderos", "Seven", "La Vida es Bella", "Gladiator",
+                "Braveheart", "Grease", "Dirty Dancing", "Pretty Woman", "Top Gun",
+                "Misión Imposible", "007 James Bond", "Los Juegos del Hambre", "Crepúsculo", "Harry el Sucio"
+            ],
+            anime: [
+                "Dragon Ball", "Naruto", "One Piece", "Attack on Titan", "Death Note",
+                "Pokemon", "Sailor Moon", "Evangelion", "Demon Slayer", "My Hero Academia",
+                "Totoro", "El Viaje de Chihiro", "Fullmetal Alchemist", "Tokyo Ghoul", "Haikyuu",
+                "Oliver y Benji", "Doraemon", "Shin Chan", "Digimon", "Sakura Card Captor",
+                "JoJo No Kimyou Na Bouken", "Hunter x Hunter", "Bleach", "Cowboy Bebop", "Akira",
+                "One Punch Man", "Spy x Family", "Blue Lock", "Chainsaw Man", "Jujutsu Kaisen",
+                "Berserk", "Code Geass", "Steins;Gate", "Fairy Tail", "Black Clover",
+                "Sword Art Online", "Re:Zero", "Gintama", "Your Name", "El Castillo Ambulante",
+                "Vinland Saga", "Mob Psycho 100", "Dr. Stone", "Fire Force", "Soul Eater",
+                "Inuyasha", "Ranma 1/2", "Caballeros del Zodiaco", "Heidi", "Marco"
+            ],
+            famosos: [
+                "Shakira", "Messi", "Cristiano Ronaldo", "Taylor Swift", "Elon Musk",
+                "Donald Trump", "Will Smith", "Beyoncé", "Rihanna", "Bad Bunny",
+                "Rosalía", "Ibai", "Kim Kardashian", "Justin Bieber", "Dua Lipa",
+                "Jennifer Lopez", "Tom Cruise", "Brad Pitt", "Angelina Jolie", "Leonardo DiCaprio",
+                "Fernando Alonso", "Rafa Nadal", "Piqué", "Aitana", "Bizarrap",
+                "Vinicius", "Mbappé", "LeBron James", "Michael Jackson", "Marilyn Monroe",
+                "Elvis Presley", "Freddie Mercury", "Madonna", "Lady Gaga", "Kanye West",
+                "Snoop Dogg", "Eminem", "Adele", "Harry Styles", "Zendaya",
+                "Tom Holland", "Robert Downey Jr", "Scarlett Johansson", "Johnny Depp", "Penélope Cruz",
+                "Antonio Banderas", "Pedro Sánchez", "Rey Felipe VI", "Belén Esteban", "Paquirrín"
+            ],
+            animales: [
+                "Ornitorrinco", "Jirafa", "Elefante", "Hipopótamo", "Canguro",
+                "Pingüino", "León", "Tigre", "Oso Panda", "Koala",
+                "Delfín", "Ballena", "Tiburón", "Águila", "Loro",
+                "Cocodrilo", "Serpiente", "Camaleón", "Suricato", "Perezoso",
+                "Ajolote", "Capibara", "Narval", "Medusa", "Pulpo",
+                "Erizo", "Llama", "Alpaca", "Flamenco", "Tucán",
+                "Mapache", "Zorro", "Lobo", "Oso Polar", "Gorila",
+                "Chimpancé", "Lemur", "Cebra", "Rinoceronte", "Búfalo",
+                "Avestruz", "Pavo Real", "Cisne", "Búho", "Murciélago",
+                "Castor", "Nutria", "Foca", "Morsa", "Manatí"
+            ],
+            comida: [
+                "Pizza", "Hamburguesa", "Sushi", "Paella", "Tacos",
+                "Helado", "Chocolate", "Macarrones", "Ensalada", "Fruta",
+                "Palomitas", "Queso", "Jamón", "Tortilla", "Croqueta",
+                "Spaghetti", "Kebab", "Curry", "Burrito", "Donut",
+                "Churros", "Gazpacho", "Lasagna", "Ramen", "Dim Sum",
+                "Ceviche", "Empanada", "Brownie", "Cheesecake", "Nachos",
+                "Pancakes", "Waffles", "Crepes", "Tiramisú", "Gelatina",
+                "Aceitunas", "Bocadillo", "Sándwich", "Perrito Caliente", "Fajitas",
+                "Quesadilla", "Guacamole", "Hummus", "Falafel", "Cuscús",
+                "Pollo Asado", "Costillas", "Chuletas", "Salmón", "Atún"
+            ],
+            deportes: [
+                "Fútbol", "Baloncesto", "Tenis", "Natación", "Voleibol",
+                "Boxeo", "Rugby", "Golf", "Ciclismo", "Atletismo",
+                "Esgrima", "Surf", "Esquí", "Snowboard", "Judo",
+                "Karate", "Gimnasia", "Béisbol", "Hockey", "Escalada",
+                "Padel", "Bádminton", "Waterpolo", "Crossfit", "Yoga",
+                "Pilates", "Skate", "Parkour", "Triatlón", "Formula 1",
+                "Balonmano", "Halterofilia", "Remo", "Tiro con Arco", "Vela",
+                "Motociclismo", "Rally", "Dardos", "Billar", "Bolos",
+                "Petanca", "Ajedrez", "E-sports", "Lacrosse", "Curling",
+                "Sumo", "Taekwondo", "Kickboxing", "MMA", "Lucha Libre"
+            ],
+            random: [
+                "Wifi", "Suegra", "Tinder", "Resaca", "Lunes",
+                "Ikea", "Autobús", "Ascensor", "Playa", "Montaña",
+                "Dentista", "Examen", "Boda", "Divorcio", "Cumpleaños",
+                "Navidad", "Halloween", "Carnaval", "Feria", "Concierto",
+                "Netflix", "TikTok", "Selfie", "Influencer", "Hater",
+                "Meme", "Emoji", "Spoiler", "Crush", "Friendzone",
+                "Atasco", "Multa", "Lotería", "Vacaciones", "Pasaporte",
+                "Maleta", "Mudanza", "Reforma", "Vecinos", "Comunidad",
+                "Hipotec", "Alquiler", "Entrevista", "Jefe", "Despido",
+                "Huelga", "Manifestación", "Votaciones", "Politica", "Impuestos"
+            ],
+            oficios: [
+                "Bombero", "Policía", "Médico", "Profesor", "Astronauta",
+                "Cocinero", "Jardinero", "Peluquero", "Mecánico", "Piloto",
+                "Juez", "Abogado", "Arquitecto", "Ingeniero", "Fontanero",
+                "Electricista", "Carpintero", "Actor", "Cantante", "Youtuber",
+                "Streamer", "Programador", "Diseñador", "Escritor", "Periodista",
+                "Fotógrafo", "Modelo", "Veterinario", "Dentista", "Psicólogo",
+                "Científico", "Arqueólogo", "Historiador", "Filósofo", "Músico",
+                "Pintor", "Escultor", "Director", "Guionista", "Editor"
+            ],
+            objetos: [
+                "Sartén", "Lavadora", "Microondas", "Sofá", "Cama",
+                "Espejo", "Lámpara", "Reloj", "Paraguas", "Mochila",
+                "Gafas", "Llaves", "Cartera", "Móvil", "Ordenador",
+                "Ratón", "Teclado", "Impresora", "Cámara", "Trípode",
+                "Ventilador", "Aire Acondicionado", "Estufa", "Radiador", "Mesa",
+                "Silla", "Armario", "Cajón", "Puerta", "Ventana",
+                "Cortina", "Alfombra", "Cojín", "Manta", "Sábana",
+                "Toalla", "Jabón", "Champú", "Cepillo", "Peine"
+            ],
+            lugares: [
+                "Hospital", "Aeropuerto", "Estación", "Biblioteca", "Cine",
+                "Teatro", "Museo", "Parque", "Playa", "Bosque",
+                "Desierto", "Jungla", "Castillo", "Cueva", "Isla",
+                "Volcán", "Espacio", "Luna", "Marte", "Infierno",
+                "Cielo", "Paraíso", "Cementerio", "Iglesia", "Catedral",
+                "Mezquita", "Sinagoga", "Templo", "Pagoda", "Pirámide",
+                "Rascacielos", "Puente", "Túnel", "Carretera", "Autopista",
+                "Calle", "Plaza", "Avenida", "Barrio", "Ciudad"
+            ]
         };
-        // --- Utility ---
-        const getTodayString = () => new Date().toISOString().split('T')[0];
-        // --- Components ---
-        const Icon = ({ name, className }) => <span className={`material-icons-round ${className}`}>{name}</span>;
-        const TabBar = ({ activeTab, setTab }) => (
-            <div className="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-md border-t border-white/10 flex justify-around p-3 z-50 rounded-t-2xl shadow-2xl">
-                {['dashboard', 'diet', 'routine'].map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => setTab(tab)}
-                        className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === tab ? 'text-primary scale-110' : 'text-gray-500'}`}
-                    >
-                        <Icon name={tab === 'dashboard' ? 'grid_view' : tab === 'diet' ? 'restaurant' : 'fitness_center'} className="text-2xl" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{tab === 'routine' ? 'Rutina' : tab === 'diet' ? 'Dieta' : 'Inicio'}</span>
-                    </button>
-                ))}
+
+        const TEAM_COLORS = [
+            { name: 'Rojo', bg: 'bg-red-500', text: 'text-red-500' },
+            { name: 'Azul', bg: 'bg-blue-500', text: 'text-blue-500' },
+            { name: 'Verde', bg: 'bg-green-500', text: 'text-green-500' },
+            { name: 'Amarillo', bg: 'bg-yellow-500', text: 'text-yellow-500' },
+        ];
+
+        // --- COMPONENTS ---
+
+        const Button = ({ children, onClick, color = "brand-pink", className = "", size = "md" }) => {
+            const sizeClasses = size === "lg" ? "py-4 px-8 text-xl" : "py-2 px-4 text-lg";
+            const colorClasses = {
+                "brand-pink": "bg-brand-pink shadow-[0_6px_0_rgb(190,24,93)] hover:shadow-[0_3px_0_rgb(190,24,93)] hover:translate-y-[3px]",
+                "brand-cyan": "bg-brand-cyan shadow-[0_6px_0_rgb(8,145,178)] hover:shadow-[0_3px_0_rgb(8,145,178)] hover:translate-y-[3px]",
+                "brand-yellow": "bg-brand-yellow text-black shadow-[0_6px_0_rgb(202,138,4)] hover:shadow-[0_3px_0_rgb(202,138,4)] hover:translate-y-[3px]",
+                "brand-purple": "bg-brand-purple shadow-[0_6px_0_rgb(88,28,135)] hover:shadow-[0_3px_0_rgb(88,28,135)] hover:translate-y-[3px]",
+                "green": "bg-green-500 shadow-[0_6px_0_rgb(21,128,61)] hover:shadow-[0_3px_0_rgb(21,128,61)] hover:translate-y-[3px]",
+                "red": "bg-red-500 shadow-[0_6px_0_rgb(185,28,28)] hover:shadow-[0_3px_0_rgb(185,28,28)] hover:translate-y-[3px]",
+                "gray": "bg-gray-600 shadow-[0_6px_0_rgb(75,85,99)] hover:shadow-[0_3px_0_rgb(75,85,99)] hover:translate-y-[3px]",
+            }[color] || "bg-gray-500";
+
+            return (
+                <button
+                    onClick={onClick}
+                    className={`rounded-2xl font-display uppercase tracking-wider font-bold transition-all active:translate-y-[6px] active:shadow-none ${sizeClasses} ${colorClasses} ${className}`}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const Card = ({ children, className = "" }) => (
+            <div className={`bg-gray-800 rounded-3xl p-6 shadow-xl border-b-4 border-gray-700 ${className}`}>
+                {children}
             </div>
         );
-        const Dashboard = ({ data, updateWater }) => {
-            const waterPercent = Math.min((data.water / 4) * 100, 100);
-            // Calculate consumed totals
-            const totals = data.diet.reduce((acc, meal) => {
-                if (meal.consumed) {
-                    acc.calories += meal.calories;
-                    acc.p += (meal.macros ? meal.macros.p : 0);
-                    acc.c += (meal.macros ? meal.macros.c : 0);
-                    acc.f += (meal.macros ? meal.macros.f : 0);
-                }
-                return acc;
-            }, { calories: 0, p: 0, c: 0, f: 0 });
-            const TARGETS = { calories: 2562, p: 250, c: 251, f: 62 };
-            // Cardio Logic (Cycle: 2 days ON, 1 day OFF)
-            const today = new Date();
-            const dayIndex = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
-            const cardioStatus = (dayIndex % 3) !== 2 ? "Hoy Toca" : "Descanso";
-            const ProgressBar = ({ label, current, target, colorClass }) => {
-                const pct = Math.min((current / target) * 100, 100);
-                return (
-                    <div className="mb-2 last:mb-0">
-                        <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-400 font-bold">{label}</span>
-                            <span className="text-white">{Math.round(current)} / {target}g</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div className={`h-full ${colorClass}`} style={{ width: `${pct}%`, transition: 'width 0.5s ease-out' }}></div>
-                        </div>
-                    </div>
-                );
-            };
+
+        const Icon = ({ name, size = "md", className = "" }) => {
+            const sizes = { sm: "text-lg", md: "text-2xl", lg: "text-4xl", xl: "text-6xl" };
+            return <span className={`material-icons-round ${sizes[size]} ${className}`}>{name}</span>
+        };
+
+        const Modal = ({ isOpen, children }) => {
+            if (!isOpen) return null;
             return (
-                <div className="space-y-6 animate-fade-in pb-20">
-                    <header className="flex justify-between items-center mb-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-white">Hola, Atleta</h1>
-                            <p className="text-sm text-gray-400">Objetivo: Ganancia Muscular</p>
-                        </div>
-                    </header>
-                    {/* Macros Card */}
-                    <div className="bg-surface p-5 rounded-2xl shadow-lg border border-white/5 relative overflow-hidden">
-                        <div className="flex justify-between items-end mb-4 relative z-10">
-                            <span className="text-gray-400 font-medium">Calorías Hoy</span>
-                            <span className="text-3xl font-bold text-white">{totals.calories} <span className="text-sm text-gray-400">/ {TARGETS.calories}</span></span>
-                        </div>
-                        <div className="w-full h-3 bg-black/40 rounded-full overflow-hidden mb-5">
-                            <div
-                                className="h-full bg-gradient-to-r from-primary to-green-400"
-                                style={{ width: `${Math.min((totals.calories / 2000) * 100, 100)}%`, transition: 'width 0.5s ease-out' }}
-                            ></div>
-                        </div>
-                        <div className="space-y-2 relative z-10">
-                            <ProgressBar label="PROTEÍNA" current={totals.p} target={TARGETS.p} colorClass="bg-blue-500" />
-                            <ProgressBar label="CARBOHIDRATOS" current={totals.c} target={TARGETS.c} colorClass="bg-orange-500" />
-                            <ProgressBar label="GRASAS" current={totals.f} target={TARGETS.f} colorClass="bg-yellow-500" />
-                        </div>
-                    </div>
-                    {/* Water Tracker */}
-                    <div className="bg-surface p-0 rounded-2xl shadow-lg border border-white/5 relative overflow-hidden h-40 flex items-center justify-center">
-                        <div className="water-wave" style={{ height: `${waterPercent}%` }}></div>
-                        <div className="z-10 text-center">
-                            <h3 className="text-white font-medium mb-1 drop-shadow-md">Hidratación</h3>
-                            <div className="text-4xl font-black text-white drop-shadow-md">{data.water}<span className="text-lg">L</span> / 4L</div>
-                            <button
-                                onClick={() => updateWater(0.25)}
-                                className="mt-2 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-4 py-1 rounded-full text-sm font-bold transition-colors"
-                            >
-                                + 250ml
-                            </button>
-                        </div>
-                    </div>
-                    {/* Cardio Status */}
-                    <div className={`p-5 rounded-2xl shadow-lg border border-white/5 flex items-center justify-between ${cardioStatus === 'Descanso' ? 'bg-gray-800' : 'bg-gradient-to-br from-orange-500/20 to-red-500/20'}`}>
-                        <div>
-                            <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">Cardio Cíclico</p>
-                            <h2 className={`text-2xl font-black mt-1 ${cardioStatus === 'Descanso' ? 'text-gray-300' : 'text-orange-400'}`}>
-                                {cardioStatus.toUpperCase()}
-                            </h2>
-                        </div>
-                        <Icon name={cardioStatus === 'Descanso' ? 'bedtime' : 'directions_run'} className={`text-4xl ${cardioStatus === 'Descanso' ? 'text-gray-500' : 'text-orange-400'}`} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="w-full max-w-sm animate-pop">
+                        {children}
                     </div>
                 </div>
             );
         };
-        const Diet = ({ diet, updateDiet, toggleMeal, mockScan }) => {
-            return (
-                <div className="space-y-4 pb-20">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Plan Nutricional</h2>
-                    </div>
-                    {diet.map((meal, index) => (
-                        <div key={meal.id} className={`p-4 rounded-xl border transition-all duration-300 ${meal.consumed ? 'bg-primary/5 border-primary/30' : 'bg-surface border-white/5'}`}>
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 className={`font-bold ${meal.consumed ? 'text-primary' : 'text-white'}`}>{meal.name}</h3>
-                                    <div className="flex gap-2 mt-1 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
-                                        <span className="text-blue-400">P: {meal.macros?.p}</span>
-                                        <span className="text-orange-400">C: {meal.macros?.c}</span>
-                                        <span className="text-yellow-400">G: {meal.macros?.f}</span>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <span className="text-xs text-gray-400 font-mono bg-black/20 px-2 py-0.5 rounded">{meal.calories} kcal</span>
-                                    <button
-                                        onClick={() => toggleMeal(index)}
-                                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${meal.consumed ? 'bg-primary border-primary' : 'border-gray-600 hover:border-gray-400'}`}
-                                    >
-                                        {meal.consumed && <Icon name="check" className="text-black text-sm font-bold" />}
-                                    </button>
-                                </div>
-                            </div>
-                            <textarea
-                                className={`w-full bg-black/20 text-sm p-3 rounded-lg border focus:border-primary/50 focus:outline-none resize-none transition-colors ${meal.consumed ? 'text-gray-500 border-transparent' : 'text-gray-300 border-white/5'}`}
-                                rows="2"
-                                value={meal.items}
-                                onChange={(e) => updateDiet(index, e.target.value)}
-                            />
-                        </div>
-                    ))}
-                </div>
-            );
-        };
-        // --- Advanced Components ---
-        const BodyStatsForm = ({ onClose, onSave }) => {
-            const [formData, setFormData] = useState({
-                weight: '', imc: '', fat: '', muscle: '',
-                water: '', protein: '', visceral: '', bone: ''
-            });
 
-            const handleChange = (e) => {
-                const { name, value } = e.target;
-                setFormData(prev => ({ ...prev, [name]: value }));
-            };
+        // --- SCREENS ---
 
-            const handleSubmit = () => {
-                // Basic validation
-                if (!formData.weight && !formData.muscle) {
-                    alert("Introduce al menos el Peso o Músculo.");
-                    return;
-                }
-                onSave({
-                    id: Date.now(),
-                    date: getTodayString(),
-                    ...Object.keys(formData).reduce((acc, key) => {
-                        acc[key] = parseFloat(formData[key]) || 0;
-                        return acc;
-                    }, {})
-                });
-                onClose();
-            };
-
-            const fields = [
-                { name: 'weight', label: 'Peso (kg)', icon: 'monitor_weight' },
-                { name: 'fat', label: 'Grasa (%)', icon: 'opacity' },
-                { name: 'muscle', label: 'Músculo (kg)', icon: 'fitness_center' },
-                { name: 'water', label: 'Agua (%)', icon: 'water_drop' },
-                { name: 'visceral', label: 'Visceral', icon: 'local_fire_department' },
-                { name: 'protein', label: 'Proteína (%)', icon: 'egg_alt' },
-                { name: 'bone', label: 'Hueso (kg)', icon: 'accessibility' },
-                { name: 'imc', label: 'IMC', icon: 'calculate' },
+        const Tutorial = ({ onStart }) => {
+            const [step, setStep] = useState(0);
+            const steps = [
+                { icon: "groups", title: "Haz Equipos", text: "Júntate con tus amigos y divide el grupo en equipos (mínimo 2)." },
+                { icon: "category", title: "Elige Tema", text: "Selecciona una categoría de palabras: Cine, Animales, Deportes..." },
+                { icon: "style", title: "3 Rondas", text: "1. ¡Descúbrela! (Cualquier pista)\n2. ¡Una Palabra! (Solo 1)\n3. ¡Mímica! (Silencio absoluto)" },
+                { icon: "casino", title: "La Ruleta", text: "¡Cuidado! Antes de cada turno, un Reto aleatorio te lo pondrá difícil." },
             ];
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur p-4 animate-fade-in">
-                    <div className="bg-surface border border-white/10 p-6 rounded-2xl w-full max-w-sm shadow-2xl h-[80vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Icon name="add_circle" className="text-primary" /> Nuevo Registro
-                            </h2>
-                            <button onClick={onClose}><Icon name="close" /></button>
+                <div className="flex flex-col h-screen p-6 items-center justify-center text-center space-y-8">
+                    <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
+
+                    <Card className="w-full max-w-sm bg-brand-purple border-brand-pink relative overflow-hidden">
+                        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="relative z-10">
+                            <Icon name={steps[step].icon} size="xl" className="text-brand-cyan mb-4 block animate-bounce-slow" />
+                            <h2 className="text-2xl font-bold mb-2">{steps[step].title}</h2>
+                            <p className="text-lg whitespace-pre-line text-gray-200">{steps[step].text}</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            {fields.map(f => (
-                                <div key={f.name}>
-                                    <label className="text-xs text-gray-400 font-bold uppercase block mb-1">{f.label}</label>
-                                    <div className="relative">
-                                        <Icon name={f.icon} className="absolute left-3 top-2.5 text-gray-500 text-sm" />
-                                        <input
-                                            type="number"
-                                            step="0.1"
-                                            name={f.name}
-                                            value={formData[f.name]}
-                                            onChange={handleChange}
-                                            className="w-full bg-black/30 border border-white/10 rounded-lg py-2 pl-9 pr-2 text-white focus:border-primary/50 outline-none text-sm"
-                                            placeholder="0.0"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <button onClick={handleSubmit} className="w-full mt-6 bg-primary text-black font-bold py-3 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">
-                            Guardar Datos
-                        </button>
-                    </div>
-                </div>
-            );
-        };
+                    </Card>
 
-        const StatCard = ({ label, value, unit, prevValue, inverse = false }) => {
-            const diff = value - prevValue;
-            const isBetter = inverse ? diff < 0 : diff > 0; // Less fat is better (inverse=true), More muscle is better (inverse=false)
-
-            // Color logic: 
-            // If prevValue is undefined (first entry), show neutral.
-            // If diff is 0, neutral.
-            // otherwise check isBetter.
-
-            let colorClass = "text-gray-400";
-            let arrow = "";
-
-            if (prevValue !== undefined && diff !== 0) {
-                colorClass = isBetter ? "text-primary" : "text-red-500";
-                arrow = diff > 0 ? "⬆" : "⬇";
-            }
-
-            return (
-                <div className="bg-surface p-4 rounded-xl border border-white/5 flex flex-col justify-between">
-                    <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-1">{label}</p>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-white">{value}</span>
-                        <span className="text-xs text-gray-400 font-bold">{unit}</span>
-                    </div>
-                    {prevValue !== undefined && (
-                        <p className={`text-xs font-mono font-bold mt-1 ${colorClass}`}>
-                            {diff > 0 ? '+' : ''}{diff.toFixed(1)}{unit} {arrow}
-                        </p>
-                    )}
-                </div>
-            );
-        };
-
-        const Progress = ({ historyLog, bodyStatsLog, exercises, onAddBodyStat }) => {
-            const [mode, setMode] = useState('body'); // 'lifts' or 'body'
-            const [showBodyForm, setShowBodyForm] = useState(false);
-
-            // --- LIFTS LOGIC ---
-            // Flatten all exercises for the dropdown
-            const allExercises = useMemo(() => {
-                const list = [];
-                Object.values(WORKOUT_ROUTINE).forEach(day => {
-                    day.exercises.forEach(ex => list.push(ex));
-                });
-                return list;
-            }, []);
-
-            const [selectedId, setSelectedId] = useState('push1'); // Default: Press Banca
-
-            // Prepare Data Lifts
-            const liftData = useMemo(() => {
-                return historyLog
-                    .filter(e => e.exerciseId === selectedId)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-            }, [historyLog, selectedId]);
-
-            // --- BODY LOGIC ---
-            const sortedBodyArgs = useMemo(() => {
-                return [...bodyStatsLog].sort((a, b) => new Date(a.date) - new Date(b.date));
-            }, [bodyStatsLog]);
-
-            const currentBody = sortedBodyArgs[sortedBodyArgs.length - 1] || {};
-            const prevBody = sortedBodyArgs[sortedBodyArgs.length - 2] || {};
-
-            // --- SHARED CHART LOGIC ---
-            // We reuse the SVG logic for both. We just need to map data to { label, value }
-            const getChartData = () => {
-                if (mode === 'lifts') {
-                    return liftData.map(d => ({ date: d.date, value: d.maxKg }));
-                } else {
-                    // Default to Weight for Body Chart, or maybe make it selectable? 
-                    // Let's stick to Muscle Mass as it's the goal "Ganancia Muscular"
-                    return sortedBodyArgs.map(d => ({ date: d.date, value: d.muscle })); // Plotting Muscle
-                }
-            };
-
-            const chartPoints = getChartData();
-
-            // Chart Dimensions
-            const height = 200;
-            const width = 300;
-            const padding = 20;
-
-            // Calculate Scales
-            const maxVal = Math.max(...chartPoints.map(d => d.value), 0) * 1.05;
-            const minVal = Math.max(Math.min(...chartPoints.map(d => d.value), 0) * 0.95, 0);
-
-            const getX = (index) => {
-                if (chartPoints.length <= 1) return width / 2;
-                return padding + (index / (chartPoints.length - 1)) * (width - 2 * padding);
-            };
-
-            const getY = (val) => {
-                if (maxVal === minVal) return height / 2;
-                return height - padding - ((val - minVal) / (maxVal - minVal)) * (height - 2 * padding);
-            };
-
-            const pathD = chartPoints.length > 1
-                ? 'M' + chartPoints.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' L')
-                : '';
-
-            return (
-                <div className="pb-24 animate-fade-in">
-                    {/* Header & Toggle */}
-                    <div className="flex justify-between items-center mb-6">
-                        <div className="bg-surface p-1 rounded-xl border border-white/10 flex">
-                            <button
-                                onClick={() => setMode('body')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'body' ? 'bg-primary text-black shadow-lg' : 'text-gray-400'}`}
-                            >
-                                Corporal
-                            </button>
-                            <button
-                                onClick={() => setMode('lifts')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'lifts' ? 'bg-primary text-black shadow-lg' : 'text-gray-400'}`}
-                            >
-                                Fuerza
-                            </button>
-                        </div>
-                        {mode === 'body' && (
-                            <button onClick={() => setShowBodyForm(true)} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black shadow-lg shadow-primary/20">
-                                <Icon name="add" className="font-bold" />
-                            </button>
-                        )}
-                    </div>
-
-                    {mode === 'lifts' && (
-                        <div className="mb-4">
-                            <select
-                                value={selectedId}
-                                onChange={(e) => setSelectedId(e.target.value)}
-                                className="w-full bg-surface border border-white/10 rounded-xl p-3 text-white focus:border-primary/50 outline-none text-sm font-bold"
-                            >
-                                {allExercises.map(ex => (
-                                    <option key={ex.id} value={ex.id}>{ex.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-
-                    {/* Chart Area */}
-                    <div className="bg-surface rounded-2xl p-4 border border-white/5 shadow-lg relative overflow-hidden mb-6">
-                        <h3 className="text-xs uppercase font-bold text-gray-500 mb-2">
-                            {mode === 'lifts' ? 'Progreso en Kilos' : 'Evolución Muscular (kg)'}
-                        </h3>
-                        {chartPoints.length > 0 ? (
-                            <>
-                                <div className="absolute top-4 right-4 text-right">
-                                    <span className="block text-3xl font-black text-white">{chartPoints[chartPoints.length - 1].value}</span>
-                                    <span className="text-xs text-gray-500 font-bold">{mode === 'lifts' ? 'KG (Max)' : 'KG (Músculo)'}</span>
-                                </div>
-                                <div className="h-[150px] w-full flex items-center justify-center mt-4">
-                                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
-                                        {[0, 0.5, 1].map(pct => (
-                                            <line key={pct} x1={padding} y1={padding + pct * (height - 2 * padding)} x2={width - padding} y2={padding + pct * (height - 2 * padding)} stroke="#333" strokeWidth="1" strokeDasharray="4 4" />
-                                        ))}
-                                        <path d={pathD} fill="none" stroke="#B6F262" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                        {chartPoints.length > 1 && (
-                                            <path d={`${pathD} L${getX(chartPoints.length - 1)},${height} L${getX(0)},${height} Z`} fill="url(#gradient)" opacity="0.2" />
-                                        )}
-                                        {chartPoints.map((d, i) => (
-                                            <circle key={i} cx={getX(i)} cy={getY(d.value)} r="3" fill="#121212" stroke="#B6F262" strokeWidth="2" />
-                                        ))}
-                                        <defs>
-                                            <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-                                                <stop offset="0%" stopColor="#B6F262" />
-                                                <stop offset="100%" stopColor="#B6F262" stopOpacity="0" />
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="h-32 flex items-center justify-center text-gray-500 text-sm">Sin datos aún</div>
-                        )}
-                    </div>
-
-                    {/* Body Stats Grid */}
-                    {mode === 'body' && (
-                        <div className="grid grid-cols-2 gap-3">
-                            <StatCard label="Peso" value={currentBody.weight || '-'} unit="kg" prevValue={prevBody.weight} inverse={true} />
-                            <StatCard label="Músculo" value={currentBody.muscle || '-'} unit="kg" prevValue={prevBody.muscle} inverse={false} />
-                            <StatCard label="Grasa" value={currentBody.fat || '-'} unit="%" prevValue={prevBody.fat} inverse={true} />
-                            <StatCard label="Visceral" value={currentBody.visceral || '-'} unit="" prevValue={prevBody.visceral} inverse={true} />
-                            <StatCard label="Agua" value={currentBody.water || '-'} unit="%" prevValue={prevBody.water} inverse={false} />
-                            <StatCard label="Proteína" value={currentBody.protein || '-'} unit="%" prevValue={prevBody.protein} inverse={false} />
-                            <StatCard label="Hueso" value={currentBody.bone || '-'} unit="kg" prevValue={prevBody.bone} inverse={false} />
-                            <StatCard label="IMC" value={currentBody.imc || '-'} unit="" prevValue={prevBody.imc} inverse={true} />
-                        </div>
-                    )}
-
-                    {/* Modals */}
-                    {showBodyForm && <BodyStatsForm onClose={() => setShowBodyForm(false)} onSave={onAddBodyStat} />}
-                </div>
-            );
-        };
-
-        const Timer = ({ duration, isActive, onComplete, onAdd }) => {
-            const [timeLeft, setTimeLeft] = useState(duration);
-
-            useEffect(() => {
-                setTimeLeft(duration);
-            }, [duration, isActive]);
-
-            useEffect(() => {
-                let interval;
-                if (isActive && timeLeft > 0) {
-                    interval = setInterval(() => {
-                        setTimeLeft(prev => prev - 1);
-                    }, 1000);
-                } else if (timeLeft === 0 && isActive) {
-                    onComplete();
-                }
-                return () => clearInterval(interval);
-            }, [isActive, timeLeft, onComplete]);
-
-            if (!isActive) return null;
-
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            const progress = (timeLeft / duration) * 100;
-
-            return (
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-surface/95 backdrop-blur border border-primary/20 p-3 rounded-2xl shadow-2xl z-40 flex items-center justify-between animate-slide-up">
-                    <div className="flex items-center gap-4">
-                        <div className="relative w-12 h-12 flex items-center justify-center">
-                            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                <path className="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                                <path className="text-primary transition-all duration-1000 ease-linear" strokeDasharray={`${progress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                            </svg>
-                            <span className="absolute text-xs font-bold text-white font-mono">
-                                {mins}:{secs < 10 ? '0' : ''}{secs}
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Descanso</p>
-                            <p className="text-sm font-semibold text-white">Recupérate bien</p>
-                        </div>
-                    </div>
                     <div className="flex gap-2">
-                        <button onClick={onAdd} className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors">
-                            <Icon name="more_time" className="text-xl" />
-                        </button>
-                        <button onClick={onComplete} className="bg-red-500/20 hover:bg-red-500/40 text-red-500 p-2 rounded-full transition-colors">
-                            <Icon name="close" className="text-xl" />
-                        </button>
-                    </div>
-                    {/* Audio element for alarm */}
-                    <audio id="timer-alarm" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
-                </div>
-            );
-        };
-
-        const SetRow = ({ idx, set, onUpdate, onCheck }) => {
-            return (
-                <div className={`grid grid-cols-10 gap-2 items-center transition-all ${set.done ? 'opacity-50' : 'opacity-100'}`}>
-                    <div className="col-span-1 flex justify-center">
-                        <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-gray-500">
-                            {idx + 1}
-                        </div>
-                    </div>
-                    <div className="col-span-2">
-                        <input
-                            type="number"
-                            placeholder="kg"
-                            value={set.kg}
-                            onChange={(e) => onUpdate('kg', e.target.value)}
-                            className="w-full bg-black/20 border border-white/5 rounded text-center text-sm py-1 focus:border-primary/50 outline-none text-white placeholder-gray-700"
-                        />
-                    </div>
-                    <div className="col-span-2">
-                        <input
-                            type="number"
-                            placeholder="reps"
-                            value={set.reps}
-                            onChange={(e) => onUpdate('reps', e.target.value)}
-                            className="w-full bg-black/20 border border-white/5 rounded text-center text-sm py-1 focus:border-primary/50 outline-none text-white placeholder-gray-700"
-                        />
-                    </div>
-                    <div className="col-span-1"></div>
-                    <div className="col-span-4 flex justify-end">
-                        <button
-                            onClick={() => onCheck(!set.done)}
-                            className={`w-full py-1.5 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all ${set.done ? 'bg-primary text-black shadow-lg shadow-primary/20 scale-95' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
-                        >
-                            {set.done ? <Icon name="check" className="text-sm" /> : <span>Completar</span>}
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const Routine = ({ history, exercises, updateSet, triggerTimer, timerState, setTimerState }) => {
-            const [selectedDay, setSelectedDay] = useState('Lunes');
-
-            // Helper to parsing "4x6-8 / 2-3'"
-            const parseRoutine = (setStr) => {
-                // Example: "4x6-8 / 2-3'"
-                // Regex to find sets (start of string)
-                const setsMatch = setStr.match(/^(\d+)x/);
-                const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
-
-                // Rest parsing
-                let rest = 90; // default 90s
-                if (setStr.includes("2-3'")) rest = 150; // avg of 120-180
-                if (setStr.includes("60-90s")) rest = 75;
-
-                return { sets, rest };
-            };
-
-            const dayRoutine = WORKOUT_ROUTINE[selectedDay];
-
-            return (
-                <div className="h-full flex flex-col pb-24">
-                    <div className="flex overflow-x-auto gap-2 mb-4 pb-2 no-scrollbar px-1">
-                        {DAYS.map(day => (
-                            <button
-                                key={day}
-                                onClick={() => setSelectedDay(day)}
-                                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-bold transition-all ${selectedDay === day ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'bg-surface text-gray-400'}`}
-                            >
-                                {day}
-                            </button>
+                        {steps.map((_, i) => (
+                            <div key={i} className={`w-3 h-3 rounded-full transition-colors ${i === step ? 'bg-brand-yellow' : 'bg-gray-600'}`}></div>
                         ))}
                     </div>
 
-                    {dayRoutine ? (
-                        <div className="flex-1 overflow-y-auto space-y-6 pr-1">
-                            <div className="flex justify-between items-center mb-2">
-                                <h2 className="text-lg font-bold text-white uppercase tracking-wider">{dayRoutine.focus}</h2>
-                            </div>
-                            {dayRoutine.exercises.map((ex) => {
-                                const meta = parseRoutine(ex.sets);
-                                const exerciseData = exercises[ex.id] || { sets: [] };
+                    <div className="w-full max-w-sm">
+                        {step < steps.length - 1 ? (
+                            <Button onClick={() => setStep(step + 1)} color="brand-pink" className="w-full" size="lg">Siguiente</Button>
+                        ) : (
+                            <Button onClick={onStart} color="brand-cyan" className="w-full" size="lg">¡A JUGAR!</Button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
 
-                                // Ensure we have enough set slots based on the routine 
-                                // (Auto-migration/Initialization)
-                                const currentSets = exerciseData.sets || [];
-                                const displaySets = [];
-                                for (let i = 0; i < meta.sets; i++) {
-                                    displaySets.push(currentSets[i] || { kg: '', reps: '', done: false });
-                                }
+        const Lobby = ({ onGameStart }) => {
+            const [names, setNames] = useState([]);
+            const [nameInput, setNameInput] = useState("");
+            const [category, setCategory] = useState("random");
+            const [generatedTeams, setGeneratedTeams] = useState(null);
+            const [rouletteEnabled, setRouletteEnabled] = useState(true);
+            const [numTeams, setNumTeams] = useState(2);
 
-                                return (
-                                    <div key={ex.id} className="bg-surface rounded-xl p-4 border border-white/5">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="font-bold text-white text-base leading-tight w-3/4">{ex.name}</h3>
-                                            <span className="text-xs font-mono text-gray-500 bg-black/20 px-2 py-1 rounded">{ex.sets}</span>
-                                        </div>
+            const [draggedPlayer, setDraggedPlayer] = useState(null);
 
-                                        {/* Headers */}
-                                        <div className="grid grid-cols-10 gap-2 mb-2 text-[10px] uppercase font-bold text-gray-500 tracking-wider text-center">
-                                            <div className="col-span-1">Set</div>
-                                            <div className="col-span-2">Kg</div>
-                                            <div className="col-span-2">Reps</div>
-                                            <div className="col-span-1"></div>
-                                            <div className="col-span-4">Estado</div>
-                                        </div>
+            const addName = () => {
+                if (nameInput.trim().length > 0) {
+                    setNames([...names, nameInput.trim()]);
+                    setNameInput("");
+                }
+            };
 
-                                        <div className="space-y-2">
-                                            {displaySets.map((set, idx) => (
-                                                <SetRow
+            const generateTeams = () => {
+                const shuffled = [...names].sort(() => 0.5 - Math.random());
+                // Use manual numTeams
+                const actualNumTeams = Math.min(numTeams, names.length, TEAM_COLORS.length);
+
+                const teams = Array.from({ length: actualNumTeams }, (_, i) => ({
+                    ...TEAM_COLORS[i],
+                    members: [],
+                    score: 0
+                }));
+
+                shuffled.forEach((name, i) => {
+                    teams[i % actualNumTeams].members.push(name);
+                });
+
+                setGeneratedTeams(teams);
+            };
+
+            const onDragStart = (e, player, sourceTeamIndex) => {
+                setDraggedPlayer({ player, sourceTeamIndex });
+            };
+
+            const onDragOver = (e) => {
+                e.preventDefault();
+            };
+
+            const onDrop = (e, targetTeamIndex) => {
+                e.preventDefault();
+                if (!draggedPlayer) return;
+
+                const { player, sourceTeamIndex } = draggedPlayer;
+                if (sourceTeamIndex === targetTeamIndex) return;
+
+                const newTeams = [...generatedTeams];
+                // Remove from old
+                newTeams[sourceTeamIndex].members = newTeams[sourceTeamIndex].members.filter(m => m !== player);
+                // Add to new
+                newTeams[targetTeamIndex].members.push(player);
+
+                setGeneratedTeams(newTeams);
+                setDraggedPlayer(null);
+            };
+
+            if (generatedTeams) {
+                return (
+                    <div className="flex flex-col h-screen p-4 overflow-y-auto">
+                        <h2 className="text-3xl font-display text-center mb-6 mt-4">Equipos Listos</h2>
+                        <p className="text-center text-gray-400 text-sm mb-4">¡Arrastra los nombres para cambiar de equipo!</p>
+                        <div className="space-y-4 mb-8 flex-1">
+                            {generatedTeams.map((team, i) => (
+                                <Card
+                                    key={i}
+                                    className={`border-l-8 ${team.bg.replace('bg-', 'border-')} flex flex-col transition-transform hover:scale-[1.01]`}
+                                    onDragOver={onDragOver}
+                                    onDrop={(e) => onDrop(e, i)}
+                                >
+                                    <div
+                                        className="h-full w-full"
+                                        onDragOver={onDragOver}
+                                        onDrop={(e) => onDrop(e, i)}
+                                    >
+                                        <h3 className={`text-xl font-bold ${team.text} mb-2 pointer-events-none`}>Equipo {team.name}</h3>
+                                        <div className="flex flex-wrap gap-2 pointer-events-none">
+                                            {team.members.map((m, idx) => (
+                                                <span
                                                     key={idx}
-                                                    idx={idx}
-                                                    set={set}
-                                                    onUpdate={(field, val) => updateSet(ex.id, idx, field, val)}
-                                                    onCheck={(done) => {
-                                                        const wasDone = set.done;
-                                                        updateSet(ex.id, idx, 'done', done);
-                                                        // Trigger Timer if checking (not unchecking)
-                                                        if (done && !wasDone) {
-                                                            triggerTimer(meta.rest);
-                                                        }
+                                                    draggable="true"
+                                                    onDragStart={(e) => {
+                                                        // Stop propagation to avoid issues if nested
+                                                        e.stopPropagation();
+                                                        onDragStart(e, m, i);
                                                     }}
-                                                />
+                                                    className="bg-white/10 px-3 py-1 rounded-full text-sm font-bold cursor-grab active:cursor-grabbing hover:bg-white/20 pointer-events-auto"
+                                                >
+                                                    {m}
+                                                </span>
                                             ))}
                                         </div>
                                     </div>
-                                );
-                            })}
+                                </Card>
+                            ))}
                         </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-40 text-gray-500">
-                            Descanso / No asignado
+                        <div className="flex gap-4 mb-4">
+                            <Button onClick={() => setGeneratedTeams(null)} color="gray" className="flex-1">Rehacer</Button>
+                            <Button onClick={() => onGameStart(generatedTeams, category, rouletteEnabled)} color="brand-yellow" className="flex-1">¡Empezar!</Button>
                         </div>
-                    )}
+                    </div>
+                );
+            }
 
-                    <Timer
-                        duration={timerState.duration}
-                        isActive={timerState.isActive}
-                        onComplete={() => {
-                            setTimerState(prev => ({ ...prev, isActive: false }));
-                            // document.getElementById('timer-alarm')?.play();
-                            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                            alert("¡Tiempo de descanso terminado! 🔔");
-                        }}
-                        onAdd={() => setTimerState(prev => ({ ...prev, duration: prev.duration + 30 }))}
-                    />
+            return (
+                <div className="flex flex-col h-screen p-4">
+                    <h2 className="text-3xl font-display text-center mb-6 mt-4">Configuración</h2>
+
+                    <div className="flex-1 overflow-y-auto space-y-6">
+                        {/* Player Input */}
+                        <section>
+                            <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Jugadores</label>
+                            <div className="flex gap-2 mb-3">
+                                <input
+                                    type="text"
+                                    value={nameInput}
+                                    onChange={(e) => setNameInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && addName()}
+                                    className="flex-1 bg-gray-800 rounded-xl px-4 py-2 border-2 border-gray-700 focus:border-brand-pink outline-none transition-colors"
+                                    placeholder="Nombre..."
+                                />
+                                <Button onClick={addName} size="md" color="brand-cyan"><Icon name="add" size="sm" /></Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {names.map((n, i) => (
+                                    <span key={i} className="bg-brand-purple px-3 py-1 rounded-full text-sm font-bold animate-pop flex items-center gap-2">
+                                        {n} <button onClick={() => setNames(names.filter((_, idx) => idx !== i))}><Icon name="close" size="sm" className="text-xs opacity-50 hover:opacity-100" /></button>
+                                    </span>
+                                ))}
+                                {names.length === 0 && <p className="text-gray-500 text-sm italic">Añade al menos 2 jugadores...</p>}
+                            </div>
+                        </section>
+
+                        {/* Team Selection */}
+                        <section>
+                            <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Número de Equipos</label>
+                            <div className="flex gap-2">
+                                {[2, 3, 4].map(n => (
+                                    <button
+                                        key={n}
+                                        onClick={() => setNumTeams(n)}
+                                        className={`flex-1 p-3 rounded-xl border-2 font-bold text-xl transition-all ${numTeams === n ? 'bg-brand-cyan border-brand-cyan text-white shadow-lg scale-105' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Category Selector */}
+                        <section>
+                            <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Categoría</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {Object.keys(WORD_DB).concat(['todo']).map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setCategory(cat)}
+                                        className={`p-3 rounded-xl border-2 font-bold capitalize transition-all ${category === cat ? 'bg-brand-pink border-brand-pink text-white' : 'bg-gray-800 border-gray-700 text-gray-400'}`}
+                                    >
+                                        {cat === 'todo' ? '¡Mezclado!' : cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Options */}
+                        <section>
+                            <label className="block text-sm font-bold text-gray-400 uppercase mb-2">Opciones</label>
+                            <div
+                                onClick={() => setRouletteEnabled(!rouletteEnabled)}
+                                className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all ${rouletteEnabled ? 'bg-brand-purple border-brand-pink' : 'bg-gray-800 border-gray-700'}`}
+                            >
+                                <span className="font-bold flex items-center gap-2">
+                                    <Icon name="casino" size="md" /> Ruleta de Retos
+                                </span>
+                                <div className={`w-12 h-6 rounded-full p-1 transition-colors ${rouletteEnabled ? 'bg-brand-yellow' : 'bg-gray-600'}`}>
+                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${rouletteEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div className="pt-4">
+                        <Button
+                            onClick={generateTeams}
+                            disabled={names.length < numTeams}
+                            className={`w-full ${names.length < numTeams ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            color="brand-cyan"
+                            size="lg"
+                        >
+                            Crear Equipos
+                        </Button>
+                        {names.length < numTeams && <p className="text-red-400 text-center text-sm font-bold mt-2">Faltan Jugadores</p>}
+                    </div>
                 </div>
             );
         };
 
-        // --- Main App ---
-        const App = () => {
-            const [tab, setTab] = useState('dashboard');
-            // Timer State (Lifted Up)
-            const [timerState, setTimerState] = useState({ isActive: false, duration: 60 });
+        const Roulette = ({ onComplete }) => {
+            const [spinning, setSpinning] = useState(false);
+            const [displayChallenge, setDisplayChallenge] = useState(null);
+            const [finalReview, setFinalReview] = useState(false);
 
-            // State
-            const [data, setData] = useState(() => {
-                const today = getTodayString();
-                const savedJson = localStorage.getItem(VERSION_KEY);
-                let saved = savedJson ? JSON.parse(savedJson) : null;
+            // Ref for the animation interval
+            const intervalRef = useRef(null);
 
-                // MOCK DATA GENERATOR for Demo
-                const mockHistory = [
-                    { date: '2023-10-01', exerciseId: 'push1', maxKg: 60 },
-                    { date: '2023-10-08', exerciseId: 'push1', maxKg: 65 },
-                    { date: '2023-10-15', exerciseId: 'push1', maxKg: 65 },
-                    { date: '2023-10-22', exerciseId: 'push1', maxKg: 70 },
-                ];
+            const spin = () => {
+                if (spinning) return;
+                setSpinning(true);
+                setFinalReview(false);
 
-                // User's provided Zepp Life Data
-                const userStatsMock = [{
-                    id: 1,
-                    date: '2023-10-01', // Set to past to allow "new" entries to show delta
-                    weight: 104,
-                    imc: 33.1,
-                    fat: 34.2,
-                    water: 46.9,
-                    protein: 15.5,
-                    visceral: 13,
-                    muscle: 65.45,
-                    bone: 3.52
-                }];
+                let speed = 50; // Initial speed (ms)
+                let counter = 0;
+                const totalSpins = 40; // Total text changes before stopping
 
-                // Default initial state
-                if (!saved) {
-                    return {
-                        water: 0,
-                        diet: DEFAULT_DIET,
-                        history: {},
-                        exercises: {},
-                        historyLog: mockHistory, // New Field
-                        bodyStatsLog: userStatsMock, // New Field
-                        lastActiveDate: today
-                    };
-                }
+                const animate = () => {
+                    // Randomly pick one to show
+                    const randomChal = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+                    setDisplayChallenge(randomChal);
 
-                // Initial migration for existing users
-                if (!saved.historyLog) {
-                    saved.historyLog = mockHistory;
-                }
-                if (!saved.bodyStatsLog) {
-                    saved.bodyStatsLog = userStatsMock;
-                }
+                    counter++;
 
-                // Daily Reset Logic
-                if (saved.lastActiveDate !== today) {
-                    // Reset Logic needs to define what happens to Exercises?
-                    // User said: "poner todo a cero MENOS EL PESO".
-                    // So we must KEEP the `kg` and `reps` but set `done` to false.
-                    // Loop through all exercises
-                    const resetExercises = {};
-                    Object.keys(saved.exercises).forEach(key => {
-                        const ex = saved.exercises[key];
-                        // If it's the new array format set `done` to false
-                        if (ex.sets && Array.isArray(ex.sets)) {
-                            resetExercises[key] = {
-                                ...ex,
-                                sets: ex.sets.map(s => ({ ...s, done: false }))
-                            };
-                        } else {
-                            // Legacy format migration protection
-                            resetExercises[key] = ex;
-                        }
-                    });
+                    if (counter < totalSpins) {
+                        // Slow down logic
+                        if (counter > totalSpins - 10) speed += 30;
+                        if (counter > totalSpins - 5) speed += 50;
 
-                    return {
-                        ...saved,
-                        water: 0,
-                        diet: saved.diet.map(meal => ({ ...meal, consumed: false })),
-                        exercises: resetExercises,
-                        lastActiveDate: today
-                    };
-                }
+                        intervalRef.current = setTimeout(animate, speed);
+                    } else {
+                        // Stop!
+                        setSpinning(false);
+                        setFinalReview(true);
+                        // Vibrate if mobile supports
+                        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    }
+                };
 
-                return saved;
-            });
-            // Persistence
-            useEffect(() => {
-                localStorage.setItem(VERSION_KEY, JSON.stringify(data));
-            }, [data]);
-
-            const triggerTimer = (seconds) => {
-                setTimerState({ isActive: true, duration: seconds });
+                animate();
             };
 
-            // Enhanced Exercise Update (Per Set)
-            const updateSet = (exerciseId, setIndex, field, value) => {
-                setData(prev => {
-                    const prevEx = prev.exercises[exerciseId] || { sets: [] };
-                    const currentSets = [...(prevEx.sets || [])];
+            // Cleanup in case of unmount
+            useEffect(() => {
+                return () => clearTimeout(intervalRef.current);
+            }, []);
 
-                    // Fill gaps if strictly setting a high index (unlikely with map)
-                    while (currentSets.length <= setIndex) {
-                        currentSets.push({ kg: '', reps: '', done: false });
+            return (
+                <div className="flex flex-col items-center justify-center p-6 text-center h-full">
+                    {!finalReview && !spinning ? (
+                        <>
+                            <div className="mb-4">
+                                <div className="text-9xl animate-bounce-slow">🎰</div>
+                                <div className="text-xl font-bold text-gray-400 mt-2">¿Preparado?</div>
+                            </div>
+                            <h2 className="text-4xl font-display font-black mb-8 text-brand-yellow drop-shadow-lg">RULETA DE RETOS</h2>
+                            <Button onClick={spin} size="lg" color="brand-purple" className="w-full max-w-xs shadow-2xl">⚡ GIRAR ⚡</Button>
+                        </>
+                    ) : (
+                        <div className="w-full max-w-sm flex flex-col items-center">
+                            <h2 className="text-xl font-bold text-gray-400 uppercase tracking-widest mb-6">
+                                {spinning ? "Buscando tu destino..." : "¡Tu Reto Es!"}
+                            </h2>
+
+                            {/* The Slot Machine Display */}
+                            <div className={`
+                                bg-gray-800 border-4 ${spinning ? 'border-brand-purple animate-pulse' : 'border-brand-pink'} 
+                                rounded-3xl p-8 mb-8 w-full min-h-[200px] flex items-center justify-center shadow-2xl relative overflow-hidden
+                            `}>
+                                {/* Background beams effect if finished */}
+                                {!spinning && (
+                                    <div className="absolute inset-0 bg-brand-pink/20 animate-pulse"></div>
+                                )}
+
+                                <p className={`
+                                    text-3xl font-black leading-tight relative z-10 transition-all duration-100
+                                    ${spinning ? 'blur-[1px] scale-95 opacity-80' : 'scale-110 opacity-100 text-brand-yellow text-shadow-lg'}
+                                `}>
+                                    {displayChallenge ? displayChallenge.text : "..."}
+                                </p>
+                            </div>
+
+                            {!spinning && (
+                                <div className="animate-slide-up w-full space-y-3">
+                                    <Button onClick={() => onComplete(displayChallenge)} size="lg" color="brand-cyan" className="w-full shadow-2xl">
+                                        ¡Aceptar Reto!
+                                    </Button>
+                                    <button onClick={spin} className="text-gray-500 text-sm font-bold hover:text-white underline decoration-dashed">
+                                        Re-Girar (Tramposo...)
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const Game = ({ teams, settings, onEndGame }) => {
+            // Game State
+            const [round, setRound] = useState(1);
+            const [currentTeamIdx, setCurrentTeamIdx] = useState(0);
+            const [deck, setDeck] = useState([]);
+            const [turnDeck, setTurnDeck] = useState([]); // Cards for current turn usage or reshuffling
+
+            // Turn State
+            const [phase, setPhase] = useState('PRE_TURN'); // PRE_TURN, ROULETTE, PLAYING, SUMMARY
+            const [challenge, setChallenge] = useState(null);
+            const [timeLeft, setTimeLeft] = useState(60);
+            const [currentCard, setCurrentCard] = useState(null);
+            const [scoreThisTurn, setScoreThisTurn] = useState(0);
+
+            // Init Deck
+            useEffect(() => {
+                let categories = settings.category === 'todo' ? Object.keys(WORD_DB) : [settings.category];
+                let words = [];
+                // Get words
+                categories.forEach(c => {
+                    if (WORD_DB[c]) words = words.concat(WORD_DB[c]);
+                });
+                // Shuffle and pick subset
+                // INCREASED DECK SIZE from 30 to 40
+                const gameDeck = words.sort(() => 0.5 - Math.random()).slice(0, 40);
+                setDeck(gameDeck);
+            }, []);
+
+            // Timer
+            useEffect(() => {
+                let interval;
+                if (phase === 'PLAYING' && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                } else if (timeLeft === 0 && phase === 'PLAYING') {
+                    endTurn();
+                }
+                return () => clearInterval(interval);
+            }, [phase, timeLeft]);
+
+            const currentTeam = teams[currentTeamIdx];
+
+            const startTurn = () => {
+                if (settings.rouletteEnabled) {
+                    setPhase('ROULETTE');
+                } else {
+                    setPhase('PLAYING');
+                    setTimeLeft(60);
+                    setScoreThisTurn(0);
+                    pickCard();
+                }
+            };
+
+            const onRouletteDone = (chal) => {
+                setChallenge(chal);
+                setPhase('PLAYING');
+                setTimeLeft(60);
+                setScoreThisTurn(0);
+                pickCard();
+            };
+
+            const pickCard = () => {
+                setDeck(currentDeck => {
+                    if (currentDeck.length === 0) {
+                        setCurrentCard(null);
+                        setTimeout(() => endTurn(true), 0); // End Round immediately
+                        return currentDeck;
                     }
-
-                    // Update specific set
-                    currentSets[setIndex] = { ...currentSets[setIndex], [field]: value };
-
-                    // --- History Log Logic ---
-                    // Calculate new daily max for this exercise if checking 'done' or updating 'kg'.
-                    // (Actually we can just calc 'max' of all done sets)
-                    const tempSets = currentSets.map((s, i) => i === setIndex ? { ...s, [field]: value } : s);
-                    const doneSets = tempSets.filter(s => s.done || (field === 'done' && value === true));
-                    // Note: 'doneSets' logic above is slightly imperfect as 'value' might be kg. 
-                    // Let's rely on the final state of 'currentSets'.
-
-                    let newHistoryLog = prev.historyLog || [];
-
-                    // Only update history if a set is DONE
-                    const isAnyDone = currentSets.some(s => s.done) || (field === 'done' && value === true);
-
-                    if (isAnyDone) {
-                        const today = getTodayString();
-                        const dailyMax = Math.max(0, ...currentSets.map(s => (s.done && Number(s.kg)) || 0));
-                        // Check if we need to update today's log
-                        // If 'value' is kg and set is done, include it.
-                        // Ideally we compute full max from `currentSets`.
-
-                        // We need to re-scan `currentSets` CAREFULLY.
-                        // If we are UPDATING 'kg', and it IS 'done', then use new value.
-                        // If we are UPDATING 'done' to true, use 'kg'.
-
-                        // Better calculation: use the `currentSets` which already has the new value applied in memory above (line 579)
-                        const realSets = currentSets;
-                        const calculatedMax = Math.max(0, ...realSets.map(s => s.done ? (Number(s.kg) || 0) : 0));
-
-                        if (calculatedMax > 0) {
-                            const idx = newHistoryLog.findIndex(h => h.date === today && h.exerciseId === exerciseId);
-                            if (idx >= 0) {
-                                // Update existing
-                                const entry = newHistoryLog[idx];
-                                if (calculatedMax > entry.maxKg) {
-                                    // Optimization: only update if bigger? Or always sync to current max?
-                                    // Always sync to current max matches reality.
-                                    newHistoryLog = [...newHistoryLog];
-                                    newHistoryLog[idx] = { ...entry, maxKg: calculatedMax };
-                                }
-                            } else {
-                                // Insert new
-                                newHistoryLog = [...newHistoryLog, { date: today, exerciseId, maxKg: calculatedMax }];
-                            }
-                        }
-                    }
-
-                    return {
-                        ...prev,
-                        historyLog: newHistoryLog,
-                        exercises: {
-                            ...prev.exercises,
-                            [exerciseId]: {
-                                ...prevEx,
-                                sets: currentSets
-                            }
-                        }
-                    };
+                    const card = currentDeck[0];
+                    setCurrentCard(card);
+                    return currentDeck;
                 });
             };
 
-            const addBodyStat = (newStat) => {
-                setData(prev => ({
-                    ...prev,
-                    bodyStatsLog: [...(prev.bodyStatsLog || []), newStat]
-                }));
+            const handleAnswer = (correct) => {
+                if (!currentCard) return;
+
+                if (correct) {
+                    currentTeam.score += 1;
+                    setScoreThisTurn(s => s + 1);
+
+                    // Add to "Next Round Pile"
+                    setTurnDeck(prev => [...prev, currentCard]);
+
+                    // Remove from Current Deck
+                    setDeck(prev => {
+                        const newDeck = prev.slice(1);
+                        // Check immediate end
+                        if (newDeck.length === 0) {
+                            setTimeout(() => endTurn(true), 0);
+                        } else {
+                            // Pick next
+                            setTimeout(() => setCurrentCard(newDeck[0]), 50);
+                        }
+                        return newDeck;
+                    });
+                } else {
+                    // Pass: Recycle directly to bottom of effective deck
+                    setDeck(prev => {
+                        const newDeck = [...prev.slice(1), currentCard];
+                        setTimeout(() => setCurrentCard(newDeck[0]), 50);
+                        return newDeck;
+                    });
+                }
             };
 
-            // Simple stubs for props not changed in this step (Mocking for context)
-            const updateWater = (amount) => {
-                setData(prev => ({ ...prev, water: Math.min(Math.round((prev.water + amount) * 100) / 100, 5) }));
-            };
-            const updateDiet = (index, newText) => {
-                const newDiet = [...data.diet];
-                newDiet[index].items = newText;
-                setData(prev => ({ ...prev, diet: newDiet }));
-            };
-            const toggleMeal = (index) => {
-                const newDiet = [...data.diet];
-                newDiet[index].consumed = !newDiet[index].consumed;
-                setData(prev => ({ ...prev, diet: newDiet }));
+            const endTurn = (roundEnded = false) => {
+                setPhase('SUMMARY');
+                // Clean up turn state
             };
 
-            return (
-                <div className="app-container font-sans text-gray-100 p-4">
-                    {tab === 'dashboard' && <Dashboard data={data} updateWater={updateWater} />}
-                    {tab === 'diet' && <Diet diet={data.diet} updateDiet={updateDiet} toggleMeal={toggleMeal} />}
-                    {tab === 'routine' && (
-                        <Routine
-                            history={data.history}
-                            exercises={data.exercises}
-                            updateSet={updateSet}
-                            triggerTimer={triggerTimer}
-                            timerState={timerState}
-                            setTimerState={setTimerState}
-                        />
-                    )}
-                    {tab === 'progress' && (
-                        <Progress
-                            historyLog={data.historyLog || []}
-                            bodyStatsLog={data.bodyStatsLog || []}
-                            exercises={WORKOUT_ROUTINE}
-                            onAddBodyStat={addBodyStat}
-                        />
-                    )}
+            const nextStep = () => {
+                // If the deck is empty (length 0), the round is over.
+                if (deck.length === 0) {
+                    // ROUND ENDED
+                    if (round === 3) {
+                        onEndGame(teams); // GAME OVER
+                    } else {
+                        // PREPARE NEXT ROUND
+                        setRound(r => r + 1);
 
-                    {/* Tab Bar updated locally to avoid strict prop drilling issues in full rewrite */}
-                    <div className="fixed bottom-0 left-0 w-full bg-surface/95 backdrop-blur-md border-t border-white/10 flex justify-around p-3 z-50 rounded-t-2xl shadow-2xl">
-                        {['dashboard', 'diet', 'routine', 'progress'].map(t => (
-                            <button
-                                key={t}
-                                onClick={() => setTab(t)}
-                                className={`flex flex-col items-center gap-1 transition-all duration-300 ${tab === t ? 'text-primary scale-110' : 'text-gray-500'}`}
-                            >
-                                <Icon name={t === 'dashboard' ? 'grid_view' : t === 'diet' ? 'restaurant' : t === 'routine' ? 'fitness_center' : 'show_chart'} className="text-2xl" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider">
-                                    {t === 'routine' ? 'Rutina' : t === 'diet' ? 'Dieta' : t === 'progress' ? 'Progres' : 'Inicio'}
-                                </span>
-                            </button>
-                        ))}
+                        // Restore deck from 'turnDeck' (cards guessed this round) 
+                        const fullDeck = [...turnDeck].sort(() => 0.5 - Math.random());
+                        setDeck(fullDeck);
+                        setTurnDeck([]); // Reset accumulator
+
+                        // Pass turn
+                        setCurrentTeamIdx((currentTeamIdx + 1) % teams.length);
+                        setPhase('PRE_TURN');
+                    }
+                } else {
+                    // Just next turn
+                    setCurrentTeamIdx((currentTeamIdx + 1) % teams.length);
+                    setPhase('PRE_TURN');
+                }
+            };
+
+            // Render
+            if (phase === 'PRE_TURN') {
+                return (
+                    <div className={`flex flex-col h-screen p-6 items-center justify-center text-center ${currentTeam.bg} transition-colors duration-500`}>
+                        <h2 className="text-xl uppercase font-bold text-white/80 mb-2">Turno del Equipo</h2>
+                        <h1 className="text-6xl font-display text-white mb-8">{currentTeam.name}</h1>
+
+                        <div className="bg-white/20 p-6 rounded-3xl backdrop-blur-md mb-8 w-full max-w-sm">
+                            <p className="text-xl font-bold uppercase mb-1">Ronda {round}</p>
+                            <p className="text-3xl font-display text-white">
+                                {round === 1 ? "Descripción" : round === 2 ? "Una Palabra" : "Mímica"}
+                            </p>
+                        </div>
+
+                        <Button onClick={startTurn} color="brand-yellow" size="lg" className="w-full max-w-xs shadow-xl">¡Empezar!</Button>
+                        <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm">
+                            {teams.map((t, i) => (
+                                <div key={i} className="flex justify-between bg-black/20 p-2 rounded-lg">
+                                    <span>{t.name}</span>
+                                    <span className="font-bold">{t.score}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    {/* <TabBar activeTab={tab} setTab={setTab} /> Removed in favor of inline for this edit to ensure sync */}
+                );
+            }
+
+            if (phase === 'ROULETTE') {
+                return (
+                    <Modal isOpen={true}>
+                        <div className="bg-gray-900 rounded-3xl overflow-hidden border-4 border-brand-purple h-[60vh]">
+                            <Roulette onComplete={onRouletteDone} />
+                        </div>
+                    </Modal>
+                );
+            }
+
+            if (phase === 'SUMMARY') {
+                const isRoundEnd = deck.length === 0;
+                return (
+                    <div className="flex flex-col h-screen p-6 items-center justify-center text-center space-y-6">
+                        <h2 className="text-4xl font-display text-white">¡Tiempo!</h2>
+                        <Card className="w-full max-w-xs bg-brand-cyan text-black">
+                            <p className="text-xl font-bold uppercase mb-2">Puntos este turno</p>
+                            <p className="text-8xl font-display">{scoreThisTurn}</p>
+                        </Card>
+
+                        {isRoundEnd && (
+                            <div className="bg-brand-yellow text-black px-6 py-3 rounded-xl font-bold text-xl animate-bounce-slow">
+                                ¡RONDA {round} COMPLETADA!
+                            </div>
+                        )}
+
+                        <Button onClick={nextStep} color="brand-pink" size="lg" className="w-full max-w-xs">
+                            {isRoundEnd && round === 3 ? "Ver Resultados Finales" : "Siguiente Equipo"}
+                        </Button>
+                    </div>
+                );
+            }
+
+            // PLAYING PHASE
+            return (
+                <div className={`flex flex-col h-screen p-4 ${currentTeam.bg} transition-colors duration-500`}>
+                    {/* Top Bar */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="bg-black/30 px-4 py-2 rounded-full font-mono font-bold text-xl flex items-center gap-2">
+                            <Icon name="timer" size="sm" /> {timeLeft}s
+                        </div>
+                        <div className="bg-black/30 px-4 py-2 rounded-full font-bold text-xl">
+                            {deck.length} cartas
+                        </div>
+                    </div>
+
+                    {/* Challenge Reminder */}
+                    <div className="bg-black/20 text-center py-2 px-4 rounded-xl mb-4 text-sm font-bold flex items-center justify-center gap-2">
+                        <Icon name="warning" size="sm" className="text-brand-yellow" />
+                        Reto: {challenge?.text || 'Ninguno'}
+                    </div>
+
+                    {/* Card */}
+                    <div className="flex-1 flex items-center justify-center mb-8 relative">
+                        {/* Card Stack Effect */}
+                        <div className="absolute w-full max-w-sm h-64 bg-white/10 rounded-3xl transform rotate-3 scale-95" />
+                        <div className="absolute w-full max-w-sm h-64 bg-white/20 rounded-3xl transform -rotate-2 scale-98" />
+
+                        <div className="w-full max-w-sm h-80 bg-white text-gray-900 rounded-3xl shadow-2xl flex items-center justify-center p-6 text-center z-10 animate-pop">
+                            <h2 className="text-5xl font-display font-black leading-tight break-words">
+                                {currentCard || "..."}
+                            </h2>
+                        </div>
+                    </div>
+
+                    {/* Controls */}
+                    <div className="grid grid-cols-2 gap-4 pb-4">
+                        <Button onClick={() => handleAnswer(false)} color="red" size="lg" className="h-24 flex flex-col items-center justify-center">
+                            <Icon name="close" size="lg" />
+                            <span className="text-sm mt-1">PASAR</span>
+                        </Button>
+                        <Button onClick={() => handleAnswer(true)} color="green" size="lg" className="h-24 flex flex-col items-center justify-center">
+                            <Icon name="check" size="lg" />
+                            <span className="text-sm mt-1">ACIERTO</span>
+                        </Button>
+                    </div>
                 </div>
             );
         };
-        // Mount
+
+        const Victory = ({ teams, onRestart }) => {
+            const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+
+            return (
+                <div className="flex flex-col h-screen p-6 items-center justify-center bg-brand-dark overflow-y-auto">
+                    <h1 className="text-5xl font-display text-brand-yellow mb-8 text-center text-shadow-lg">¡Resultados!</h1>
+
+                    <div className="w-full max-w-md space-y-4 mb-10">
+                        {sortedTeams.map((team, idx) => (
+                            <div key={idx} className={`bg-gray-800 rounded-2xl p-4 flex items-center justify-between border-b-4 border-gray-700 animate-slide-up`} style={{ animationDelay: `${idx * 100}ms` }}>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-3xl font-display w-8 text-center">{idx + 1}º</span>
+                                    <div className={`w-4 h-4 rounded-full ${team.bg}`}></div>
+                                    <span className="text-xl font-bold">{team.name}</span>
+                                </div>
+                                <span className="text-3xl font-display text-brand-pink">{team.score} pts</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <Button onClick={onRestart} color="brand-cyan" size="lg" className="w-full max-w-xs animate-bounce-slow">
+                        Jugar Otra Vez
+                    </Button>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            // Phases: TUTORIAL -> LOBBY -> GAME -> VICTORY
+            const [appPhase, setAppPhase] = useState('TUTORIAL');
+            const [gameData, setGameData] = useState({ teams: [], settings: {} });
+
+            const handleTutorialEnd = () => setAppPhase('LOBBY');
+
+            const handleGameStart = (teams, category, rouletteEnabled) => {
+                setGameData({ teams, settings: { category, rouletteEnabled, roundDuration: 60 } });
+                setAppPhase('GAME');
+            };
+
+            const handleGameEnd = (finalTeams) => {
+                // Update teams score one last time if needed (usually refs match)
+                setAppPhase('VICTORY');
+            };
+
+            const handleRestart = () => {
+                setAppPhase('LOBBY'); // Back to Lobby to maybe shuffle teams
+            };
+
+            return (
+                <div className="antialiased text-white h-screen w-screen overflow-hidden">
+                    {appPhase === 'TUTORIAL' && <Tutorial onStart={handleTutorialEnd} />}
+                    {appPhase === 'LOBBY' && <Lobby onGameStart={handleGameStart} />}
+                    {appPhase === 'GAME' && <Game teams={gameData.teams} settings={gameData.settings} onEndGame={handleGameEnd} />}
+                    {appPhase === 'VICTORY' && <Victory teams={gameData.teams} onRestart={handleRestart} />}
+                </div>
+            );
+        };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-
     </script>
 </body>
 
