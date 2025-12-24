@@ -342,7 +342,7 @@
                     <div className="relative inline-block">
                         <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
                         <span className="absolute -top-4 -right-6 bg-brand-pink text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white transform rotate-12 shadow-lg animate-pulse">
-                            v2.3
+                            v2.8
                         </span>
                     </div>
 
@@ -722,11 +722,12 @@
             const [teamPlayerIndices, setTeamPlayerIndices] = useState(teams.map(() => 0));
             const [deck, setDeck] = useState([]);
             const [turnDeck, setTurnDeck] = useState([]); // Cards for current turn usage or reshuffling
+            const [skippedCards, setSkippedCards] = useState([]); // Cards skipped this turn (to be passed to next team)
 
             // Turn State
             const [phase, setPhase] = useState('PRE_TURN'); // PRE_TURN, ROULETTE, PLAYING, SUMMARY
             const [challenge, setChallenge] = useState(null);
-            const [timeLeft, setTimeLeft] = useState(60);
+            const [timeLeft, setTimeLeft] = useState(settings.roundDuration || 60);
             const [currentCard, setCurrentCard] = useState(null);
             const [scoreThisTurn, setScoreThisTurn] = useState(0);
 
@@ -735,11 +736,27 @@
                 endTurn();
             };
 
-            const playSuccessSound = () => {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
+            const [guessedCardsThisTurn, setGuessedCardsThisTurn] = useState([]);
+            const audioCtxRef = useRef(null);
 
-                const ctx = new AudioContext();
+            useEffect(() => {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtxRef.current = new AudioContext();
+                }
+                return () => {
+                    if (audioCtxRef.current) audioCtxRef.current.close();
+                }
+            }, []);
+
+            const playSuccessSound = () => {
+                if (!audioCtxRef.current) return;
+                const ctx = audioCtxRef.current;
+
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
                 const oscillator = ctx.createOscillator();
                 const gainNode = ctx.createGain();
 
@@ -834,8 +851,9 @@
                     setPhase('ROULETTE');
                 } else {
                     setPhase('PLAYING');
-                    setTimeLeft(60);
+                    setTimeLeft(settings.roundDuration || 60);
                     setScoreThisTurn(0);
+                    setGuessedCardsThisTurn([]);
                     pickCard();
                 }
             };
@@ -843,8 +861,9 @@
             const onRouletteDone = (chal) => {
                 setChallenge(chal);
                 setPhase('PLAYING');
-                setTimeLeft(60);
+                setTimeLeft(settings.roundDuration || 60);
                 setScoreThisTurn(0);
+                setGuessedCardsThisTurn([]);
                 pickCard();
             };
 
@@ -868,6 +887,7 @@
                     playSuccessSound();
                     currentTeam.score += 1;
                     setScoreThisTurn(s => s + 1);
+                    setGuessedCardsThisTurn(prev => [{ word: currentCard, timestamp: Date.now() }, ...prev]);
 
                     // Add to "Next Round Pile"
                     setTurnDeck(prev => [...prev, currentCard]);
@@ -887,12 +907,18 @@
                         return newDeck;
                     });
                 } else {
-                    // Pass: Recycle directly to bottom of effective deck
+                    // Pass: Remove from this turn, save for next team
+                    setSkippedCards(prev => [...prev, currentCard]);
+
                     setDeck(prev => {
-                        const newDeck = [...prev.slice(1), currentCard];
-                        setTimeout(() => {
-                            setCurrentCard(newDeck[0]);
-                        }, 50);
+                        const newDeck = prev.slice(1);
+                        if (newDeck.length === 0) {
+                            setTimeout(() => endTurn(true), 0);
+                        } else {
+                            setTimeout(() => {
+                                setCurrentCard(newDeck[0]);
+                            }, 50);
+                        }
                         return newDeck;
                     });
                 }
@@ -904,8 +930,12 @@
             };
 
             const nextStep = () => {
-                // If the deck is empty (length 0), the round is over.
-                if (deck.length === 0) {
+                // Combine remaining deck + skipped cards (Passed cards) for the next team
+                // This ensures passed words are NOT deleted, but available for the next team.
+                let nextActiveDeck = [...deck, ...skippedCards];
+
+                // If NOTHING is left (neither in deck nor skipped), the round is over.
+                if (nextActiveDeck.length === 0) {
                     // ROUND ENDED
                     if (round === 3) {
                         onEndGame(teams); // GAME OVER
@@ -914,9 +944,16 @@
                         setRound(r => r + 1);
 
                         // Restore deck from 'turnDeck' (cards guessed this round) 
-                        const fullDeck = [...turnDeck].sort(() => 0.5 - Math.random());
+                        const fullDeck = [...turnDeck];
+                        // Proper Fisher-Yates Shuffle for Round Reset
+                        for (let i = fullDeck.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [fullDeck[i], fullDeck[j]] = [fullDeck[j], fullDeck[i]];
+                        }
+
                         setDeck(fullDeck);
                         setTurnDeck([]); // Reset accumulator
+                        setSkippedCards([]); // Reset skipped
 
                         // Rotate player for the team that just finished
                         setTeamPlayerIndices(prev => {
@@ -930,7 +967,15 @@
                         setPhase('PRE_TURN');
                     }
                 } else {
-                    // Just next turn
+                    // NEXT TURN (Same Round)
+                    // Shuffle the combined deck (remaining + skipped) so they are MIXED
+                    for (let i = nextActiveDeck.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [nextActiveDeck[i], nextActiveDeck[j]] = [nextActiveDeck[j], nextActiveDeck[i]];
+                    }
+
+                    setDeck(nextActiveDeck);
+                    setSkippedCards([]); // Clear skipped buffer, they are now in the deck
 
                     // Rotate player for the team that just finished
                     setTeamPlayerIndices(prev => {
@@ -987,23 +1032,60 @@
             }
 
             if (phase === 'SUMMARY') {
-                const isRoundEnd = deck.length === 0;
+                const removeGuessedCard = (cardToRemove) => {
+                    // 1. Remove from UI list
+                    setGuessedCardsThisTurn(prev => prev.filter(c => c.timestamp !== cardToRemove.timestamp));
+
+                    // 2. Decrement Scores
+                    setScoreThisTurn(s => s - 1);
+                    currentTeam.score -= 1;
+
+                    // 3. Remove from 'turnDeck' (Next Round Pile) - Find LAST instance or specific logic
+                    // Since turnDeck is just strings, we find the first match of the word and remove it
+                    setTurnDeck(prev => {
+                        const idx = prev.lastIndexOf(cardToRemove.word);
+                        if (idx > -1) {
+                            const newDeck = [...prev];
+                            newDeck.splice(idx, 1);
+                            return newDeck;
+                        }
+                        return prev;
+                    });
+
+                    // 4. Add back to current Game Deck (so it can be played again this round)
+                    setDeck(prev => [cardToRemove.word, ...prev]);
+                };
+
                 return (
-                    <div className="flex flex-col h-screen p-6 items-center justify-center text-center space-y-6">
-                        <h2 className="text-4xl font-display text-white">¡Tiempo!</h2>
-                        <Card className="w-full max-w-xs bg-brand-cyan text-black">
-                            <p className="text-xl font-bold uppercase mb-2">Puntos este turno</p>
-                            <p className="text-8xl font-display">{scoreThisTurn}</p>
-                        </Card>
+                    <div className={`${currentTeam.bg} h-screen flex flex-col p-6 items-center justify-center text-center space-y-6 animate-fade-in`}>
+                        <h2 className="text-4xl font-display text-white text-shadow-lg mb-2">¡Turno Terminado!</h2>
 
-                        {isRoundEnd && (
-                            <div className="bg-brand-yellow text-black px-6 py-3 rounded-xl font-bold text-xl animate-bounce-slow">
-                                ¡RONDA {round} COMPLETADA!
+                        <div className="bg-white/10 backdrop-blur rounded-3xl p-6 w-full max-w-sm border-2 border-white/30">
+                            <p className="text-xl font-bold text-white mb-2">Puntos del turno</p>
+                            <span className="text-7xl font-display text-white text-shadow-lg">{scoreThisTurn}</span>
+                        </div>
+
+                        {/* Edit Guessed Words */}
+                        <div className="w-full max-w-sm bg-black/20 rounded-xl p-4 max-h-[200px] overflow-y-auto">
+                            <p className="text-sm text-white/70 mb-2 uppercase font-bold tracking-widest">Revisar Palabras</p>
+                            <div className="space-y-2">
+                                {guessedCardsThisTurn.length === 0 && <p className="text-white/50 italic text-sm">Ninguna palabra acertada</p>}
+                                {guessedCardsThisTurn.map((item) => (
+                                    <div key={item.timestamp} className="flex items-center justify-between bg-white/10 rounded-lg px-3 py-2">
+                                        <span className="font-bold text-white">{item.word}</span>
+                                        <button
+                                            onClick={() => removeGuessedCard(item)}
+                                            className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                                        >
+                                            <Icon name="close" size="sm" />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                        )}
+                        </div>
 
-                        <Button onClick={nextStep} color="brand-pink" size="lg" className="w-full max-w-xs">
-                            {isRoundEnd && round === 3 ? "Ver Resultados Finales" : "Siguiente Equipo"}
+                        <Button onClick={nextStep} color="brand-yellow" size="lg" className="w-full max-w-xs animate-bounce-slow">
+                            Siguiente Equipo
                         </Button>
                     </div>
                 );
@@ -1127,7 +1209,7 @@
             const handleTutorialEnd = () => setAppPhase('LOBBY');
 
             const handleGameStart = (teams, categories, rouletteEnabled) => {
-                setGameData({ teams, settings: { categories, rouletteEnabled, roundDuration: 60 } });
+                setGameData({ teams, settings: { categories, rouletteEnabled, roundDuration: 50 } });
                 setAppPhase('GAME');
             };
 
