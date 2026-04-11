@@ -399,7 +399,7 @@
                     <div className="relative inline-block">
                         <h1 className="text-5xl font-display text-brand-yellow text-shadow-lg rotate-[-2deg]">Mofly Fun</h1>
                         <span className="absolute -top-4 -right-6 bg-brand-pink text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white transform rotate-12 shadow-lg animate-pulse">
-                            v2.9
+                            v3.0
                         </span>
                     </div>
 
@@ -890,9 +890,10 @@
 
             const startTurn = () => {
                 SoundFX.init();
-                if (settings.rouletteEnabled) {
+                if (settings.rouletteEnabled && round !== 3) {
                     setPhase('ROULETTE');
                 } else {
+                    setChallenge(null);
                     setPhase('PLAYING');
                     setTimeLeft(settings.roundDuration || 60);
                     setScoreThisTurn(0);
@@ -1149,10 +1150,12 @@
                     </div>
 
                     {/* Challenge Reminder */}
-                    <div className="bg-black/20 text-center py-2 px-4 rounded-xl mb-4 text-sm font-bold flex items-center justify-center gap-2">
-                        <Icon name="warning" size="sm" className="text-brand-yellow" />
-                        Reto: {challenge?.text || 'Ninguno'}
-                    </div>
+                    {round !== 3 && (
+                        <div className="bg-black/20 text-center py-2 px-4 rounded-xl mb-4 text-sm font-bold flex items-center justify-center gap-2">
+                            <Icon name="warning" size="sm" className="text-brand-yellow" />
+                            Reto: {challenge?.text || 'Ninguno'}
+                        </div>
+                    )}
 
                     {/* Card */}
                     <div className="flex-1 flex flex-col justify-center items-center mb-8 relative w-full px-4">
@@ -1178,10 +1181,17 @@
                             <Icon name="close" size="md" />
                             <span className="text-xs mt-1">PASAR</span>
                         </Button>
-                        <Button onClick={handleChallengeFail} color="red" size="lg" className="flex flex-col items-center justify-center">
-                            <Icon name="warning" size="md" />
-                            <span className="text-xs mt-1">FALLÓ RETO</span>
-                        </Button>
+                        {round !== 3 ? (
+                            <Button onClick={handleChallengeFail} color="red" size="lg" className="flex flex-col items-center justify-center">
+                                <Icon name="warning" size="md" />
+                                <span className="text-xs mt-1">FALLÓ RETO</span>
+                            </Button>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center bg-black/20 rounded-2xl border-2 border-transparent">
+                                <Icon name="visibility_off" size="md" className="text-white/30" />
+                                <span className="text-xs mt-1 text-white/30 font-bold uppercase pointer-events-none">Sin reto</span>
+                            </div>
+                        )}
                         <Button onClick={() => handleAnswer(true)} color="green" size="lg" className="flex flex-col items-center justify-center">
                             <Icon name="check" size="md" />
                             <span className="text-xs mt-1">BIEN</span>
