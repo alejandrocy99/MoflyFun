@@ -126,7 +126,7 @@
         // --- DATA ---
         // --- DATA ---
         const CHALLENGES = [
-            { id: 1, text: "Mano en la cabeza todo el turno", verbal: true },
+            { id: 1, text: "toda la ronda con boca de pez", verbal: true },
             { id: 2, text: "Habla con la lengua fuera", verbal: false },
             { id: 3, text: "Salta mientras explicas", verbal: true },
             { id: 4, text: "Canta en lugar de hablar", verbal: true },
@@ -136,17 +136,10 @@
             { id: 8, text: "Imita a un famoso (di cuál)", verbal: true },
             { id: 9, text: "Ojos cerrados", verbal: true },
             { id: 10, text: "Susurrando muy bajito", verbal: true },
-            // New Challenges
             { id: 11, text: "Nariz tapada todo el turno", verbal: true },
             { id: 12, text: "Acento extranjero exagerado", verbal: true },
-            { id: 13, text: "Explicar enfadado/a", verbal: true },
-            { id: 14, text: "Sin mover los brazos", verbal: true },
-            { id: 15, text: "Rodillas flexionadas", verbal: true },
-            { id: 16, text: "Cara de sorpresa constante", verbal: true },
-            { id: 17, text: "Explicar como si fuera un secreto", verbal: true },
-            { id: 18, text: "Reírse entre cada frase", verbal: true },
-            { id: 19, text: "Hablar muy lento", verbal: true },
-            { id: 20, text: "Moverse a cámara lenta", verbal: true },
+            { id: 13, text: "Sin mover los brazos", verbal: true },
+            { id: 14, text: "Hablar muy lento", verbal: true },
         ];
 
         // ... (WORD_DB remains unchanged) ...
@@ -279,6 +272,70 @@
             { name: 'Verde', bg: 'bg-green-500', text: 'text-green-500' },
             { name: 'Amarillo', bg: 'bg-yellow-500', text: 'text-yellow-500' },
         ];
+
+        const SoundFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            play(type) {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                if (type === 'tick') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'spin') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'roulette_stop') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                    osc.frequency.setValueAtTime(800, now + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'time_warning') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            }
+        };
 
         // --- COMPONENTS ---
 
@@ -626,6 +683,7 @@
 
             const spin = () => {
                 if (spinning) return;
+                SoundFX.init();
                 setSpinning(true);
                 setFinalReview(false);
 
@@ -645,9 +703,11 @@
                         if (counter > totalSpins - 10) speed += 30;
                         if (counter > totalSpins - 5) speed += 50;
 
+                        SoundFX.play('spin');
                         intervalRef.current = setTimeout(animate, speed);
                     } else {
                         // Stop!
+                        SoundFX.play('roulette_stop');
                         setSpinning(false);
                         setFinalReview(true);
                         // Vibrate if mobile supports
@@ -730,48 +790,25 @@
             const [timeLeft, setTimeLeft] = useState(settings.roundDuration || 60);
             const [currentCard, setCurrentCard] = useState(null);
             const [scoreThisTurn, setScoreThisTurn] = useState(0);
+            const [showFailConfirm, setShowFailConfirm] = useState(false);
 
             const handleChallengeFail = () => {
-                // End turn immediately if challenge failed
+                setShowFailConfirm(true);
+            };
+
+            const confirmChallengeFail = () => {
+                setShowFailConfirm(false);
                 endTurn();
             };
 
-            const [guessedCardsThisTurn, setGuessedCardsThisTurn] = useState([]);
-            const audioCtxRef = useRef(null);
+            const cancelChallengeFail = () => {
+                setShowFailConfirm(false);
+            };
 
-            useEffect(() => {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    audioCtxRef.current = new AudioContext();
-                }
-                return () => {
-                    if (audioCtxRef.current) audioCtxRef.current.close();
-                }
-            }, []);
+            const [guessedCardsThisTurn, setGuessedCardsThisTurn] = useState([]);
 
             const playSuccessSound = () => {
-                if (!audioCtxRef.current) return;
-                const ctx = audioCtxRef.current;
-
-                if (ctx.state === 'suspended') {
-                    ctx.resume();
-                }
-
-                const oscillator = ctx.createOscillator();
-                const gainNode = ctx.createGain();
-
-                oscillator.connect(gainNode);
-                gainNode.connect(ctx.destination);
-
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(600, ctx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
-
-                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-
-                oscillator.start();
-                oscillator.stop(ctx.currentTime + 0.2);
+                SoundFX.play('win');
             };
 
 
@@ -836,7 +873,12 @@
             useEffect(() => {
                 let interval;
                 if (phase === 'PLAYING' && timeLeft > 0) {
-                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                    interval = setInterval(() => {
+                        SoundFX.init();
+                        if (timeLeft <= 11) SoundFX.play('time_warning');
+                        else SoundFX.play('tick');
+                        setTimeLeft(t => t - 1);
+                    }, 1000);
                 } else if (timeLeft === 0 && phase === 'PLAYING') {
                     endTurn();
                 }
@@ -847,6 +889,7 @@
             const currentPlayerName = currentTeam.members[teamPlayerIndices[currentTeamIdx]];
 
             const startTurn = () => {
+                SoundFX.init();
                 if (settings.rouletteEnabled) {
                     setPhase('ROULETTE');
                 } else {
@@ -859,6 +902,7 @@
             };
 
             const onRouletteDone = (chal) => {
+                SoundFX.init();
                 setChallenge(chal);
                 setPhase('PLAYING');
                 setTimeLeft(settings.roundDuration || 60);
@@ -1143,6 +1187,24 @@
                             <span className="text-xs mt-1">BIEN</span>
                         </Button>
                     </div>
+
+                    {/* Fail Confirm Modal */}
+                    <Modal isOpen={showFailConfirm}>
+                        <div className="bg-gray-800 border-4 border-red-500 rounded-3xl p-6 text-center shadow-2xl w-full max-w-xs mx-auto">
+                            <Icon name="warning" size="lg" className="text-red-500 mb-4 animate-[pulse_1s_infinite]" />
+                            <h2 className="text-2xl font-display text-white mb-2 leading-tight">¿Estás seguro/a?</h2>
+                            <p className="text-gray-300 mb-6 font-bold text-sm">Esto terminará el turno de inmediato si fallaste el reto.</p>
+                            
+                            <div className="flex gap-4">
+                                <Button onClick={cancelChallengeFail} color="gray" className="flex-1">
+                                    No
+                                </Button>
+                                <Button onClick={confirmChallengeFail} color="red" className="flex-1">
+                                    Sí, falló
+                                </Button>
+                            </div>
+                        </div>
+                    </Modal>
                 </div>
             );
         };
